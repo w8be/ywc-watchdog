@@ -114,7 +114,8 @@ Before starting the service, update `appsettings.json` with your Yaesu Web Contr
 
 For a complete breakdown of all settings and environment overrides, see **[CONFIGURATION.md](./CONFIGURATION.md)**.
 
-###License
+### License
+
 Distributed under the MIT License. See LICENSE for more information.
 
 ---
