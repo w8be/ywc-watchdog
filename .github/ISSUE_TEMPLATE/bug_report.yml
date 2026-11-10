@@ -61,16 +61,17 @@ body:
       description: Paste your configuration file here. **Remember to remove any passwords or private credentials first.**
       render: json
       placeholder: |
+       {
          "WatchdogSettings": {
-    "YwcApiUrl": "https://127.0.0.1:8443/api/cat/status",
-    "ShellyIp": "127.0.0.1",
-    "ShellyDevice": "Shelly Pro4PM",
-    "ShellyChannel": 1,
-    "MaxTxDurationMinutes": 2,
-    "MaxSwr": 2.5,
-    "AllowedAntennas": [1]
-  }
-
+            "YwcApiUrl": "https://127.0.0.1:8443/api/cat/status",
+            "ShellyIp": "127.0.0.1",
+            "ShellyDevice": "Shelly Pro4PM",
+            "ShellyChannel": 1,
+            "MaxTxDurationMinutes": 2,
+            "MaxSwr": 2.5,
+            "AllowedAntennas": [1]
+         }
+       }
   - type: textarea
     id: logs
     attributes:
