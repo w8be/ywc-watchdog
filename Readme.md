@@ -47,7 +47,7 @@ bash
    sudo chmod +x YwcWatchdog
 ```
 
-4. Edit appsettings.json to configure your target Shelly IP and threshold settings:
+4. Edit appsettings.json to configure Yaesu Web Control Ip, Shelly IP and threshold settings:
 
 bash
 
