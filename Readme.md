@@ -1,10 +1,10 @@
 # ywc-watchdog
 
-`ywc-watchdog` is a lightweight .NET watchdog service designed for Raspberry Pi to monitor system services and ensure high uptime.
+`ywc-watchdog` is a lightweight .NET watchdog service designed for Raspberry Pi to monitor services and ensure high uptime.
 
 ## Features
 
-- Background process monitoring for Raspberry Pi (Linux).
+- Background process monitoring for Raspberry Pi (Linux ARM64).
 - Automatic service restart upon failure detection.
 - Configurable settings via `appsettings.json`.
 
@@ -12,58 +12,74 @@
 
 ## Installation & Deployment (Raspberry Pi)
 
-You do **not** need to build this project from source to run it on your Raspberry Pi. Pre-compiled binaries are provided under GitHub Releases.
+You do not need to build this project from source to run it on your Raspberry Pi. Pre-compiled binaries are provided under GitHub Releases.
 
 ### Option A: Using Pre-Compiled Binaries (Recommended)
 
-1. Go to the [Releases](../../releases) tab on this GitHub repository and download the latest `.zip` package.
-2. Transfer the package to your Raspberry Pi and extract it:
+1. Create your application directory and download the latest release package directly from GitHub:
    ```bash
-   mkdir -p ~/ywc-watchdog
-   unzip ywc-watchdog-linux-arm64.zip -d ~/ywc-watchdog
-   cd ~/ywc-watchdog
+   sudo mkdir -p /opt/ywc-watchdog
+   cd /opt/ywc-watchdog
+   sudo curl -L -o ywc-watchdog-release.zip [https://github.com/w8be/ywc-watchdog/releases/latest/download/ywc-watchdog-release.zip](https://github.com/w8be/ywc-watchdog/releases/latest/download/ywc-watchdog-release.zip)
    ```
-3. Edit appsettings.json to configure your target processes and threshold settings
+2. Instll unzip (if not already installed) and extract the archive:
 
-```bash
-   nano appsettings.json
+```
+    bash
+   sudo apt-get update && sudo apt-get install -y unzip
+   sudo unzip -o ywc-watchdog-release.zip
+   sudo rm ywc-watchdog-release.zip
 ```
 
-3. Set execution permissions for the binary:
+3. Set execution permissions for your compiled binary:
 
-```bash
-   chmod +x ywc-watchdog
+```
+    bash
+   sudo chmod +x YwcWatchdog
+```
+
+4. Edit appsettings.json to configure your target Shelly IP and threshold settings:
+
+```
+    bash
+   sudo nano appsettings.json
 ```
 
 ### Option B: Building from Source
 
-```bash
+```
+    bash
    # Clone the repository
-   git clone [https://github.com/YOUR_USERNAME/ywc-watchdog.git](https://github.com/YOUR_USERNAME/ywc-watchdog.git)
-  cd ywc-watchdog
+git clone [https://github.com/w8be/ywc-watchdog.git](https://github.com/w8be/ywc-watchdog.git)
+cd ywc-watchdog
 
-  # Publish self-contained executable for Raspberry Pi (64-bit ARM)
-  dotnet publish -c Release -r linux-arm64 --self-contained true -o ./publish
+# Publish self-contained executable for Raspberry Pi (64-bit ARM)
+dotnet publish -c Release -r linux-arm64 --self-contained true -o ./publish
 ```
 
 ### Running as a System Service (systemd)
 
+1. Create and open the systemd service file:
+
 ```
-   bash
+    bash
    sudo nano /etc/systemd/system/ywc-watchdog.service
 ```
 
-[Unit]
-Description=YWC Watchdog Service
-After=network.target
+2. Paste the following configuration into the file:
+
+   [Unit]
+   Description=YWC Watchdog .NET Service for Raspberry Pi
+   After=network.target
 
 [Service]
 Type=simple
-WorkingDirectory=/home/pi/ywc-watchdog
-ExecStart=/home/pi/ywc-watchdog/ywc-watchdog
+User=root
+WorkingDirectory=/opt/ywc-watchdog
+ExecStart=/opt/ywc-watchdog/YwcWatchdog
 Restart=always
 RestartSec=10
-User=pi
+SyslogIdentifier=ywc-watchdog
 
 [Install]
 WantedBy=multi-user.target
@@ -71,19 +87,25 @@ WantedBy=multi-user.target
 3. Enable and start the service:
 
 ```
-   bash
+    bash
    sudo systemctl daemon-reload
-   sudo systemctl enable ywc-watchdog
-   sudo systemctl start ywc-watchdog
+   sudo systemctl enable ywc-watchdog.service
+   sudo systemctl start ywc-watchdog.service
 ```
 
-License
+4. Check service status or view live logs:
+
+```
+    bash
+   sudo systemctl status ywc-watchdog.service
+   sudo journalctl -u ywc-watchdog -f
+```
+
+###License
 Distributed under the MIT License. See LICENSE for more information.
 
 ---
 
-<ElicitationsGroup message="If you run into issues setting up your repository or releasing binaries:">
-  <Elicitation label="Publish command for Pi" query="What exact dotnet publish command should I run to build self-contained binaries for Raspberry Pi?"/>
-  <Elicitation label="Setting up systemd" query="How do I configure ywc-watchdog as a systemd background daemon on Raspberry Pi?"/>
-  <Elicitation label="How to make Release" query="How do I attach compiled zip files to a GitHub Release step-by-step?"/>
+<ElicitationsGroup message="If you are ready to update this in VS Code and push it:">
+  <Elicitation label="Review git commit commands" query="What git commands do I run to save and push my updated README.md to GitHub?"/>
 </ElicitationsGroup>
