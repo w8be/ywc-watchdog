@@ -17,7 +17,8 @@ You do not need to build this project from source to run it on your Raspberry Pi
 ### Option A: Using Pre-Compiled Binaries (Recommended)
 
 1. Create your application directory and download the latest release package directly from GitHub:
-   ```bash
+   ```
+   bash
    sudo mkdir -p /opt/ywc-watchdog
    cd /opt/ywc-watchdog
    sudo curl -L -o ywc-watchdog-release.zip [https://github.com/w8be/ywc-watchdog/releases/latest/download/ywc-watchdog-release.zip](https://github.com/w8be/ywc-watchdog/releases/latest/download/ywc-watchdog-release.zip)
@@ -25,7 +26,7 @@ You do not need to build this project from source to run it on your Raspberry Pi
 2. Instll unzip (if not already installed) and extract the archive:
 
 ```
-    bash
+   bash
    sudo apt-get update && sudo apt-get install -y unzip
    sudo unzip -o ywc-watchdog-release.zip
    sudo rm ywc-watchdog-release.zip
@@ -34,27 +35,27 @@ You do not need to build this project from source to run it on your Raspberry Pi
 3. Set execution permissions for your compiled binary:
 
 ```
-    bash
+   bash
    sudo chmod +x YwcWatchdog
 ```
 
 4. Edit appsettings.json to configure your target Shelly IP and threshold settings:
 
 ```
-    bash
+   bash
    sudo nano appsettings.json
 ```
 
 ### Option B: Building from Source
 
 ```
-    bash
+   bash
    # Clone the repository
-git clone [https://github.com/w8be/ywc-watchdog.git](https://github.com/w8be/ywc-watchdog.git)
-cd ywc-watchdog
+   git clone [https://github.com/w8be/ywc-watchdog.git](https://github.com/w8be/ywc-watchdog.git)
+   cd ywc-watchdog
 
-# Publish self-contained executable for Raspberry Pi (64-bit ARM)
-dotnet publish -c Release -r linux-arm64 --self-contained true -o ./publish
+   # Publish self-contained executable for Raspberry Pi (64-bit ARM)
+   dotnet publish -c Release -r linux-arm64 --self-contained true -o ./publish
 ```
 
 ### Running as a System Service (systemd)
@@ -62,7 +63,7 @@ dotnet publish -c Release -r linux-arm64 --self-contained true -o ./publish
 1. Create and open the systemd service file:
 
 ```
-    bash
+   bash
    sudo nano /etc/systemd/system/ywc-watchdog.service
 ```
 
@@ -72,22 +73,22 @@ dotnet publish -c Release -r linux-arm64 --self-contained true -o ./publish
    Description=YWC Watchdog .NET Service for Raspberry Pi
    After=network.target
 
-[Service]
-Type=simple
-User=root
-WorkingDirectory=/opt/ywc-watchdog
-ExecStart=/opt/ywc-watchdog/YwcWatchdog
-Restart=always
-RestartSec=10
-SyslogIdentifier=ywc-watchdog
+   [Service]
+   Type=simple
+   User=root
+   WorkingDirectory=/opt/ywc-watchdog
+   ExecStart=/opt/ywc-watchdog/YwcWatchdog
+   Restart=always
+   RestartSec=10
+   SyslogIdentifier=ywc-watchdog
 
-[Install]
-WantedBy=multi-user.target
+   [Install]
+   WantedBy=multi-user.target
 
 3. Enable and start the service:
 
 ```
-    bash
+   bash
    sudo systemctl daemon-reload
    sudo systemctl enable ywc-watchdog.service
    sudo systemctl start ywc-watchdog.service
@@ -96,7 +97,7 @@ WantedBy=multi-user.target
 4. Check service status or view live logs:
 
 ```
-    bash
+   bash
    sudo systemctl status ywc-watchdog.service
    sudo journalctl -u ywc-watchdog -f
 ```
@@ -106,6 +107,6 @@ Distributed under the MIT License. See LICENSE for more information.
 
 ---
 
-<ElicitationsGroup message="If you are ready to update this in VS Code and push it:">
-  <Elicitation label="Review git commit commands" query="What git commands do I run to save and push my updated README.md to GitHub?"/>
-</ElicitationsGroup>
+   <ElicitationsGroup message="If you are ready to update this in VS Code and push it:">
+   <Elicitation label="Review git commit commands" query="What git commands do I run to save and push my updated README.md to GitHub?"/>
+   </ElicitationsGroup>
