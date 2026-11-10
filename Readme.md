@@ -108,6 +108,12 @@ You do not need to build this project from source to run it on your Raspberry Pi
    sudo journalctl -u ywc-watchdog -f
 ```
 
+## Configuration
+
+Before starting the service, update `appsettings.json` with your Yaesu Web Control URL, Shelly relay IP address, and safety thresholds (max TX duration, SWR limit, and allowed antennas).
+
+For a complete breakdown of all settings and environment overrides, see **[CONFIGURATION.md](./CONFIGURATION.md)**.
+
 ###License
 Distributed under the MIT License. See LICENSE for more information.
 
