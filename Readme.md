@@ -6,7 +6,7 @@
 - Radio SWR
 - Radio Antennas
 
-Each of these services are configurable in the appsettings.json file. If a threshold is exceeded ywc-watchdog will inhibit transmit. If the command fails ywc-watchdog will fallback to disconnecting the mains power via a Shelly relay.
+If a threshold is exceeded ywc-watchdog will inhibit transmit. If the command fails ywc-watchdog will fallback to disconnecting the mains power via a Shelly relay.
 
 ## Features
 
