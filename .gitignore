@@ -1,0 +1,16 @@
+# Build and release outputs
+[Bb]in/
+[Oo]bj/
+logs/
+out/
+publish/
+
+# IDE & Editor files
+.vs/
+.vscode/
+*.user
+*.suo
+
+# Local app settings with private IPs/secrets
+appsettings.Development.json
+appsettings.Local.json
