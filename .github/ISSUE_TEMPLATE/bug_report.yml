@@ -1,0 +1,82 @@
+name: Bug Report
+description: Report a bug, threshold failure, or Shelly relay issue in ywc-watchdog
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for testing **ywc-watchdog**! Please fill out the details below so we can reproduce the issue in the shack.
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: Describe the issue clearly and explain what you expected the watchdog to do instead.
+      placeholder: e.g., SWR exceeded the configured limit, transmit inhibit was sent, but the Shelly relay did not trip when inhibit failed.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: trigger-type
+    attributes:
+      label: Which monitor or action was involved?
+      options:
+        - Radio transmit time (Max TX duration)
+        - Radio SWR threshold
+        - Allowed antenna check
+        - Transmit inhibit command (Yaesu Web Control)
+        - Shelly relay fallback (Mains power cutoff)
+        - Service startup / systemd crash
+        - Other
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: ywc-watchdog Version / Release
+      description: Which release tag or commit are you running?
+      placeholder: e.g., v1.0.0 or pre-compiled binary from Releases
+    validations:
+      required: true
+
+  - type: textarea
+    id: hardware
+    attributes:
+      label: Hardware & Environment
+      description: Tell us about your Raspberry Pi, radio, and Yaesu Web Control setup.
+      value: |
+        - **Raspberry Pi Model:** (e.g., Pi 4B, Pi 5, Zero 2 W)
+        - **OS & Architecture:** (e.g., Raspberry Pi OS 64-bit Bookworm / linux-arm64)
+        - **Radio Model:** (e.g., FT-991A, FTDX10, FT-710)
+        - **Shelly Device Model:** (e.g., Shelly Plus 1, Shelly Plug)
+    validations:
+      required: true
+
+  - type: textarea
+    id: config
+    attributes:
+      label: Sanitized appsettings.json
+      description: Paste your configuration file here. **Remember to remove any passwords or private credentials first.**
+      render: json
+      placeholder: |
+        {
+          "YwcUrl": "http://localhost:5000",
+          "ShellyIp": "192.168.1.xxx"
+        }
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Service Logs (journalctl)
+      description: Run `sudo journalctl -u ywc-watchdog -n 50 --no-pager` on your Pi and paste the output below.
+      render: shell
+
+  - type: checkboxes
+    id: safety-check
+    attributes:
+      label: Pre-submission Checks
+      options:
+        - label: I have removed any sensitive passwords or tokens from my config and logs.
+          required: true
