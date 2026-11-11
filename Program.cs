@@ -11,7 +11,6 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-// 1. Configure Host & Register SSL Bypass Client
 var builder = Host.CreateApplicationBuilder(args);
 
 var watchdogSettings = builder.Configuration.GetSection(nameof(WatchdogSettings)).Get<WatchdogSettings>()
@@ -24,10 +23,9 @@ builder.Services.AddHttpClient("RadioClient", client =>
 })
 .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
 {
-    // If your radio uses a self-signed or local SSL certificate:
     ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
 })
-.SetHandlerLifetime(TimeSpan.FromMinutes(5)); // Rotates the underlying handler pool regularly
+.SetHandlerLifetime(TimeSpan.FromMinutes(5));
 
 builder.Services.Configure<WatchdogSettings>(builder.Configuration.GetSection("WatchdogSettings"));
 builder.Services.AddHostedService<RadioWatchdogWorker>();
@@ -69,9 +67,6 @@ public class RadioWatchdogWorker : BackgroundService
             {
                 var client = _httpClientFactory.CreateClient("RadioClient");
 
-                // Since BaseAddress includes the endpoint (e.g. .../api/status), 
-                // use an empty string or relative path depending on your YwcApiUrl structure.
-                // If YwcApiUrl is "https://192.168.1.197:8443/api/status", pass string.Empty.
                 var response = await client.GetAsync(string.Empty, stoppingToken);
 
                 if (response.IsSuccessStatusCode)
@@ -92,7 +87,6 @@ public class RadioWatchdogWorker : BackgroundService
                 _logger.LogError(ex, "Error occurred while polling radio status API.");
             }
 
-            // Polling interval interval set to 1 second
             await Task.Delay(TimeSpan.FromSeconds(1), stoppingToken);
         }
     }
@@ -177,7 +171,7 @@ public class RadioWatchdogWorker : BackgroundService
             if (rawValue >= p1.Raw && rawValue <= p2.Raw)
             {
                 double ratio = (double)(rawValue - p1.Raw) / (p2.Raw - p1.Raw);
-                return p1.Swr + ratio * (p2.Swr - p2.Swr); // Fixed typo logic if any, keeping linear interpolation ratio
+                return p1.Swr + ratio * (p2.Swr - p2.Swr);
             }
         }
 
@@ -215,7 +209,7 @@ public class RadioWatchdogWorker : BackgroundService
         try
         {
             string shellyUrl = $"http://{_settings.ShellyIp}/relay/{_settings.ShellyChannel - 1}?turn=off";
-            // Use a default client or separate client for Shelly since it's plain HTTP on a local device
+
             var client = _httpClientFactory.CreateClient();
             var shellyResponse = await client.GetAsync(shellyUrl);
             if (shellyResponse.IsSuccessStatusCode)
@@ -246,7 +240,7 @@ public class RadioStatus
     public double SwrMeter { get; set; }
 
     [JsonPropertyName("activeVfo")]
-    public int ActiveVfo { get; set; } // 0 for VFO A, 1 for VFO B
+    public int ActiveVfo { get; set; }
 
     [JsonPropertyName("vfoA")]
     public VfoStatus? VfoA { get; set; }
