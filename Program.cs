@@ -1,4 +1,6 @@
 using System;
+using System.Text;
+using System.Net.WebSockets;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Net.Http.Json;
@@ -51,7 +53,7 @@ public class RadioWatchdogWorker : BackgroundService
         _httpClientFactory = httpClientFactory;
         _settings = settings.Value;
     }
-
+    private bool _shutdownTriggered = false;
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         _logger.LogInformation("Starting YWC REST Watchdog Service polling status endpoint...");
@@ -66,7 +68,6 @@ public class RadioWatchdogWorker : BackgroundService
             try
             {
                 var client = _httpClientFactory.CreateClient("RadioClient");
-
                 var response = await client.GetAsync(string.Empty, stoppingToken);
 
                 if (response.IsSuccessStatusCode)
@@ -74,6 +75,13 @@ public class RadioWatchdogWorker : BackgroundService
                     var radioStatus = await response.Content.ReadFromJsonAsync<RadioStatus>(cancellationToken: stoppingToken);
                     if (radioStatus != null)
                     {
+                        // 2. If connection is back and we were previously shutdown, reset the flag
+                        if (_shutdownTriggered)
+                        {
+                            _logger.LogInformation("Radio API connection restored. Resetting watchdog state.");
+                            _shutdownTriggered = false;
+                        }
+
                         await EvaluateRadioStateAsync(radioStatus);
                     }
                 }
@@ -84,16 +92,25 @@ public class RadioWatchdogWorker : BackgroundService
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error occurred while polling radio status API. Triggering emergency Shelly shutdown due to lost communication!");
+                // 3. Only trigger and log on the FIRST failure of the outage
+                if (!_shutdownTriggered)
+                {
+                    _logger.LogError(ex, "Error occurred while polling radio status API. Triggering emergency Shelly shutdown due to lost communication!");
 
-                // This is the missing piece: drop down to hardware cutoff when connection fails
-                await TriggerShellyShutdownAsync();
+                    await TriggerShellyShutdownAsync();
+
+                    _shutdownTriggered = true; // Locks it out from spamming every second!
+                }
+                else
+                {
+                    // Optional: Debug log so it doesn't completely blind you, but keeps error logs silent
+                    _logger.LogDebug("Radio API still offline. Shutdown already triggered.");
+                }
             }
 
             await Task.Delay(TimeSpan.FromSeconds(1), stoppingToken);
         }
     }
-
     private async Task EvaluateRadioStateAsync(RadioStatus status)
     {
         bool isTransmitting = status.PowerMeter > 0;
@@ -207,26 +224,107 @@ public class RadioWatchdogWorker : BackgroundService
         }
     }
 
-    private async Task TriggerShellyShutdownAsync()
+    private async Task<bool?> CheckShellyRelayStatusAsync()
     {
         try
         {
-            string shellyUrl = $"http://{_settings.ShellyIp}/relay/{_settings.ShellyChannel - 1}?turn=off";
+            string wsUri = $"ws://{_settings.ShellyIp}/rpc";
+            using var ws = new ClientWebSocket();
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(3));
 
-            var client = _httpClientFactory.CreateClient();
-            var shellyResponse = await client.GetAsync(shellyUrl);
-            if (shellyResponse.IsSuccessStatusCode)
-            {
-                _logger.LogCritical("EMERGENCY: Shelly hardware relay successfully tripped!");
+            await ws.ConnectAsync(new Uri(wsUri), cts.Token);
+
+            var rpcCommand = new Dictionary<string, object>
+        {
+            { "id", 10 },
+            { "src", "ywc-watchdog" },
+            { "method", "Switch.GetStatus" },
+            { "params", new Dictionary<string, object>
+                {
+                    { "id", _settings.ShellyChannel }
+                }
             }
-            else
+        };
+
+            string jsonPayload = JsonSerializer.Serialize(rpcCommand);
+            byte[] bytes = Encoding.UTF8.GetBytes(jsonPayload);
+
+            await ws.SendAsync(new ArraySegment<byte>(bytes), WebSocketMessageType.Text, true, cts.Token);
+
+            // Receive response buffer
+            var buffer = new byte[1024];
+            var result = await ws.ReceiveAsync(new ArraySegment<byte>(buffer), cts.Token);
+
+            if (result.MessageType == WebSocketMessageType.Text)
             {
-                _logger.LogCritical("CRITICAL ERROR: Failed to trigger Shelly relay hardware shutdown.");
+                string responseString = Encoding.UTF8.GetString(buffer, 0, result.Count);
+                using var doc = JsonDocument.Parse(responseString);
+
+                // Look for the output property in the result object
+                if (doc.RootElement.TryGetProperty("result", out var resElement) &&
+                    resElement.TryGetProperty("output", out var outputElement))
+                {
+                    return outputElement.GetBoolean(); // true = ON, false = OFF
+                }
             }
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to connect to Shelly relay at {Ip}", _settings.ShellyIp);
+            _logger.LogWarning(ex, "Failed to poll Shelly status via WebSocket.");
+        }
+
+        return null; // Status unknown
+    }
+
+    private async Task TriggerShellyShutdownAsync()
+    {
+        try
+        {
+            string wsUri = $"ws://{_settings.ShellyIp}/rpc";
+
+            _logger.LogCritical("Connecting to Shelly WebSocket at {Uri}...", wsUri);
+
+            using var ws = new ClientWebSocket();
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(3));
+
+            await ws.ConnectAsync(new Uri(wsUri), cts.Token);
+
+            var rpcCommand = new Dictionary<string, object>
+        {
+            { "id", 1 }, // Request tracking ID (standard protocol format)
+            { "src", "ywc-watchdog" },
+            { "method", "Switch.Set" },
+            { "params", new Dictionary<string, object>
+                {
+                    { "id", _settings.ShellyChannel }, // Dynamic channel from your settings!
+                    { "on", false }
+                }
+            }
+        };
+
+            string jsonPayload = JsonSerializer.Serialize(rpcCommand);
+            byte[] bytes = Encoding.UTF8.GetBytes(jsonPayload);
+
+            // Send shutdown command once cleanly
+            await ws.SendAsync(new ArraySegment<byte>(bytes), WebSocketMessageType.Text, true, cts.Token);
+            _logger.LogCritical("EMERGENCY: Sent WebSocket shutdown command to Shelly channel {Channel}.", _settings.ShellyChannel);
+
+            // Wait a moment, then poll status to verify it actually turned off
+            await Task.Delay(500, cts.Token);
+            bool? relayState = await CheckShellyRelayStatusAsync();
+
+            if (relayState == false)
+            {
+                _logger.LogCritical("VERIFIED: Shelly channel {Channel} is confirmed OFF.", _settings.ShellyChannel);
+            }
+            else
+            {
+                _logger.LogError("WARNING: Shelly channel {Channel} state could not be verified or is still ON!", _settings.ShellyChannel);
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to communicate with Shelly via WebSocket at {Ip}", _settings.ShellyIp);
         }
     }
 }
