@@ -32,7 +32,7 @@ You do not need to build this project from source to run it on your Raspberry Pi
 
 2. Instll unzip (if not already installed) and extract the archive:
 
-```
+```bash
    sudo apt-get update && sudo apt-get install -y unzip
    sudo unzip -o ywc-watchdog-release.zip
    sudo rm ywc-watchdog-release.zip
@@ -40,19 +40,19 @@ You do not need to build this project from source to run it on your Raspberry Pi
 
 3. Set execution permissions for your compiled binary:
 
-```
+```bash
    sudo chmod +x YwcWatchdog
 ```
 
 4. Edit appsettings.json to configure Yaesu Web Control Ip, Shelly IP and threshold settings:
 
-```
+```bash
    sudo nano appsettings.json
 ```
 
 ### Option B: Building from Source
 
-```
+```bash
    # Clone the repository
    git clone [https://github.com/w8be/ywc-watchdog.git](https://github.com/w8be/ywc-watchdog.git)
    cd ywc-watchdog
@@ -89,7 +89,7 @@ You do not need to build this project from source to run it on your Raspberry Pi
 
 3. Enable and start the service:
 
-```
+```bash
    sudo systemctl daemon-reload
    sudo systemctl enable ywc-watchdog.service
    sudo systemctl start ywc-watchdog.service
@@ -97,7 +97,7 @@ You do not need to build this project from source to run it on your Raspberry Pi
 
 4. Check service status or view live logs:
 
-```
+```bash
    sudo systemctl status ywc-watchdog.service
    sudo journalctl -u ywc-watchdog -f
 ```
