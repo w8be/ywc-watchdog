@@ -84,7 +84,10 @@ public class RadioWatchdogWorker : BackgroundService
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error occurred while polling radio status API.");
+                _logger.LogError(ex, "Error occurred while polling radio status API. Triggering emergency Shelly shutdown due to lost communication!");
+
+                // This is the missing piece: drop down to hardware cutoff when connection fails
+                await TriggerShellyShutdownAsync();
             }
 
             await Task.Delay(TimeSpan.FromSeconds(1), stoppingToken);
