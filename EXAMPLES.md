@@ -44,3 +44,26 @@ Nov 11 12:35:49 127.0.0.1 ywc-watchdog[8091]:        Transmit started. Power: 35
 Nov 11 12:35:51 127.0.0.1 ywc-watchdog[8091]: info: RadioWatchdogWorker[0]
 Nov 11 12:35:51 127.0.0.1 ywc-watchdog[8091]:        Transmit ended. Resetting timer.
 ```
+
+Here is a sample of live system logs from `ywc-watchdog` running on a Linux host (via `journalctl -u ywc-watchdog`), showing startup configuration, normal transmissions, and emergency cutoff actions triggered by a Maximum TX duration of 5 seconds:
+
+```text
+Nov 11 12:55:15 127.0.0.1 ywc-watchdog[8567]: info: Microsoft.Hosting.Lifetime[0]
+Nov 11 12:55:15 127.0.0.1 ywc-watchdog[8567]:       Content root path: /opt/ywc-watchdog
+Nov 11 12:55:15 127.0.0.1 ywc-watchdog[8567]: info: RadioWatchdogWorker[0]
+Nov 11 12:55:15 127.0.0.1 ywc-watchdog[8567]:       [CONFIG] Shelly IP: 192.168.1.136 (Channel: 1)
+Nov 11 12:55:15 127.0.0.1 ywc-watchdog[8567]: info: RadioWatchdogWorker[0]
+Nov 11 12:55:15 127.0.0.1 ywc-watchdog[8567]:       [CONFIG] Max TX Duration: 0.08 minutes
+Nov 11 12:55:15 127.0.0.1 ywc-watchdog[8567]: info: RadioWatchdogWorker[0]
+Nov 11 12:55:15 127.0.0.1 ywc-watchdog[8567]:       [CONFIG] Max Allowed SWR Meter: 2.5
+Nov 11 12:55:15 127.0.0.1 ywc-watchdog[8567]: info: RadioWatchdogWorker[0]
+Nov 11 12:55:15 127.0.0.1 ywc-watchdog[8567]:       [CONFIG] Allowed Antennas: [1]
+Nov 11 12:56:00 127.0.0.1 ywc-watchdog[8567]: info: RadioWatchdogWorker[0]
+Nov 11 12:56:00 127.0.0.1 ywc-watchdog[8567]:       Transmit started. Power: 35, Raw SWR: 0
+Nov 11 12:56:05 127.0.0.1 ywc-watchdog[8567]: crit: RadioWatchdogWorker[0]
+Nov 11 12:56:05 127.0.0.1 ywc-watchdog[8567]:       Max TX duration exceeded (0.08 mins). Triggering emergency PTT cutoff!
+Nov 11 12:56:05 127.0.0.1 ywc-watchdog[8567]: info: RadioWatchdogWorker[0]
+Nov 11 12:56:05 127.0.0.1 ywc-watchdog[8567]:       Successfully sent PTT cutoff command to radio.
+Nov 11 12:56:06 127.0.0.1 ywc-watchdog[8567]: info: RadioWatchdogWorker[0]
+Nov 11 12:56:06 127.0.0.1 ywc-watchdog[8567]:       Transmit ended. Resetting timer.
+```
