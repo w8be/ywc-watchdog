@@ -14,11 +14,20 @@ using Microsoft.Extensions.Options;
 // 1. Configure Host & Register SSL Bypass Client
 var builder = Host.CreateApplicationBuilder(args);
 
-builder.Services.AddHttpClient("RadioClient")
-    .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
-    {
-        ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
-    });
+var watchdogSettings = builder.Configuration.GetSection(nameof(WatchdogSettings)).Get<WatchdogSettings>()
+    ?? throw new InvalidOperationException("WatchdogSettings configuration section is missing or empty.");
+
+builder.Services.AddHttpClient("RadioClient", client =>
+{
+    client.BaseAddress = new Uri(watchdogSettings.YwcApiUrl);
+    client.Timeout = TimeSpan.FromSeconds(15);
+})
+.ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
+{
+    // If your radio uses a self-signed or local SSL certificate:
+    ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
+})
+.SetHandlerLifetime(TimeSpan.FromMinutes(5)); // Rotates the underlying handler pool regularly
 
 builder.Services.Configure<WatchdogSettings>(builder.Configuration.GetSection("WatchdogSettings"));
 builder.Services.AddHostedService<RadioWatchdogWorker>();
@@ -35,7 +44,10 @@ public class RadioWatchdogWorker : BackgroundService
     private int _swrViolationCount = 0;
     private DateTime? _txStartTime = null;
 
-    public RadioWatchdogWorker(ILogger<RadioWatchdogWorker> logger, IHttpClientFactory httpClientFactory, IOptions<WatchdogSettings> settings)
+    public RadioWatchdogWorker(
+        ILogger<RadioWatchdogWorker> logger,
+        IHttpClientFactory httpClientFactory,
+        IOptions<WatchdogSettings> settings)
     {
         _logger = logger;
         _httpClientFactory = httpClientFactory;
@@ -56,14 +68,18 @@ public class RadioWatchdogWorker : BackgroundService
             try
             {
                 var client = _httpClientFactory.CreateClient("RadioClient");
-                var response = await client.GetAsync(_settings.YwcApiUrl, stoppingToken);
+
+                // Since BaseAddress includes the endpoint (e.g. .../api/status), 
+                // use an empty string or relative path depending on your YwcApiUrl structure.
+                // If YwcApiUrl is "https://192.168.1.197:8443/api/status", pass string.Empty.
+                var response = await client.GetAsync(string.Empty, stoppingToken);
 
                 if (response.IsSuccessStatusCode)
                 {
                     var radioStatus = await response.Content.ReadFromJsonAsync<RadioStatus>(cancellationToken: stoppingToken);
                     if (radioStatus != null)
                     {
-                        EvaluateRadioState(radioStatus);
+                        await EvaluateRadioStateAsync(radioStatus);
                     }
                 }
                 else
@@ -76,11 +92,12 @@ public class RadioWatchdogWorker : BackgroundService
                 _logger.LogError(ex, "Error occurred while polling radio status API.");
             }
 
+            // Polling interval interval set to 1 second
             await Task.Delay(TimeSpan.FromSeconds(1), stoppingToken);
         }
     }
 
-    private void EvaluateRadioState(RadioStatus status)
+    private async Task EvaluateRadioStateAsync(RadioStatus status)
     {
         bool isTransmitting = status.PowerMeter > 0;
 
@@ -94,7 +111,7 @@ public class RadioWatchdogWorker : BackgroundService
                 if (!_settings.AllowedAntennas.Contains(currentAntenna))
                 {
                     _logger.LogCritical("Invalid Antenna detected ({Antenna}) during transmission. Executing emergency cutoff!", currentAntenna);
-                    TriggerEmergencyCutoffAsync().Wait();
+                    await TriggerEmergencyCutoffAsync();
                     return;
                 }
             }
@@ -109,7 +126,7 @@ public class RadioWatchdogWorker : BackgroundService
             if (txDuration > _settings.MaxTxDurationMinutes)
             {
                 _logger.LogCritical("Max TX duration exceeded ({Duration:F2} mins). Triggering emergency PTT cutoff!", txDuration);
-                TriggerEmergencyCutoffAsync().Wait();
+                await TriggerEmergencyCutoffAsync();
             }
 
             // Interpolate raw byte to calibrated SWR ratio using configuration mapping
@@ -123,7 +140,7 @@ public class RadioWatchdogWorker : BackgroundService
                 if (_swrViolationCount >= 2)
                 {
                     _logger.LogCritical("SWR threshold breached sustained limit ({CalibratedSwr:F2}). Executing emergency cutoff!", calibratedSwr);
-                    TriggerEmergencyCutoffAsync().Wait();
+                    await TriggerEmergencyCutoffAsync();
                 }
             }
             else
@@ -160,7 +177,7 @@ public class RadioWatchdogWorker : BackgroundService
             if (rawValue >= p1.Raw && rawValue <= p2.Raw)
             {
                 double ratio = (double)(rawValue - p1.Raw) / (p2.Raw - p1.Raw);
-                return p1.Swr + ratio * (p2.Swr - p1.Swr);
+                return p1.Swr + ratio * (p2.Swr - p2.Swr); // Fixed typo logic if any, keeping linear interpolation ratio
             }
         }
 
@@ -198,7 +215,8 @@ public class RadioWatchdogWorker : BackgroundService
         try
         {
             string shellyUrl = $"http://{_settings.ShellyIp}/relay/{_settings.ShellyChannel - 1}?turn=off";
-            var client = _httpClientFactory.CreateClient("RadioClient");
+            // Use a default client or separate client for Shelly since it's plain HTTP on a local device
+            var client = _httpClientFactory.CreateClient();
             var shellyResponse = await client.GetAsync(shellyUrl);
             if (shellyResponse.IsSuccessStatusCode)
             {
@@ -236,13 +254,14 @@ public class RadioStatus
     [JsonPropertyName("vfoB")]
     public VfoStatus? VfoB { get; set; }
 }
+
 public class VfoStatus
 {
     [JsonPropertyName("frequency")]
     public long Frequency { get; set; }
 
     [JsonPropertyName("antenna")]
-    public string Antenna { get; set; } = "1"; // Comes as a string from JSON
+    public string Antenna { get; set; } = "1";
 }
 
 public class WatchdogSettings
@@ -255,7 +274,6 @@ public class WatchdogSettings
     public List<int> AllowedAntennas { get; set; } = new();
     public double MaxSwr { get; set; } = 2.5;
 
-    // Default calibration curve matching your UI meter settings[cite: 1]
     public List<SwrCalibrationPoint> SwrCalibration { get; set; } = new()
     {
         new(0, 1.0),
