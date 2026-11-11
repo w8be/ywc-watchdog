@@ -24,7 +24,7 @@ You do not need to build this project from source to run it on your Raspberry Pi
 
 1. Create your application directory and download the latest release package directly from GitHub:
 
-   ```
+   ```bash
    sudo mkdir -p /opt/ywc-watchdog
    cd /opt/ywc-watchdog
    sudo curl -L -o ywc-watchdog-release.zip [https://github.com/w8be/ywc-watchdog/releases/latest/download/ywc-watchdog-release.zip](https://github.com/w8be/ywc-watchdog/releases/latest/download/ywc-watchdog-release.zip)
