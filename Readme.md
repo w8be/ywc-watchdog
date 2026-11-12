@@ -102,6 +102,14 @@ You do not need to build this project from source to run it on your Raspberry Pi
    sudo journalctl -u ywc-watchdog -f
 ```
 
+## Installation & Deployment (win-x64)
+
+1. Create your application directory and download the latest release package (ywc-watchdog-win-x64.zip)directly from GitHub
+
+2. Unzip and extract the archive:
+
+3. Edit appsettings.json to configure Yaesu Web Control Ip, Shelly IP and threshold settings
+
 ## Configuration
 
 Before starting the service, update `appsettings.json` with your Yaesu Web Control URL, Shelly relay IP address, and safety thresholds (max TX duration, SWR limit, and allowed antennas).
