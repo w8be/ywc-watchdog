@@ -28,7 +28,7 @@ You do not need to build this project from source to run it on your Raspberry Pi
 ```bash
 sudo mkdir -p /opt/ywc-watchdog
 cd /opt/ywc-watchdog
-sudo curl -L -o ywc-watchdog-release.zip "https://github.com"
+sudo curl -fL -o ywc-watchdog-linux-arm64.zip "https://github.com/w8be/ywc-watchdog/releases/download/v1.1.3/YwcWatchdog-linux-arm64.zip"
 ```
 
 2. Install `unzip` (if not already installed) and extract the archive:
@@ -55,7 +55,7 @@ sudo nano appsettings.json
 
 ```bash
 # Clone the repository
-git clone https://github.com
+git clone https://github.com/w8be/ywc-watchdog
 cd ywc-watchdog
 
 # Publish self-contained executable for Raspberry Pi (64-bit ARM)
