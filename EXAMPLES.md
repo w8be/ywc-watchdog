@@ -2,7 +2,7 @@
 
 ## Example Output
 
-Here is a sample of live system logs from `ywc-watchdog` running on a Linux host (via `journalctl -u ywc-watchdog`), showing startup configuration, normal transmissions, and emergency cutoff actions triggered by an invalid antenna and high SWR:
+Example of live system logs from `ywc-watchdog` running on a Linux host (via `journalctl -u ywc-watchdog`), showing startup configuration, normal transmissions, and emergency cutoff actions triggered by an invalid antenna and high SWR:
 
 ```text
 Nov 11 09:57:49 127.0.0.1 ywc-watchdog[8091]: info: Microsoft.Hosting.Lifetime[0]
@@ -45,7 +45,7 @@ Nov 11 12:35:51 127.0.0.1 ywc-watchdog[8091]: info: RadioWatchdogWorker[0]
 Nov 11 12:35:51 127.0.0.1 ywc-watchdog[8091]:        Transmit ended. Resetting timer.
 ```
 
-Here is a sample of live system logs from `ywc-watchdog` running on a Linux host (via `journalctl -u ywc-watchdog`), showing startup configuration, normal transmissions, and emergency cutoff actions triggered by a Maximum TX duration of 5 seconds:
+Example of live system logs from `ywc-watchdog` running on a Linux host (via `journalctl -u ywc-watchdog`), showing startup configuration, normal transmissions, and emergency cutoff actions triggered by a Maximum TX duration of 5 seconds:
 
 ```text
 Nov 11 12:55:15 127.0.0.1 ywc-watchdog[8567]: info: Microsoft.Hosting.Lifetime[0]
@@ -68,7 +68,7 @@ Nov 11 12:56:06 127.0.0.1 ywc-watchdog[8567]: info: RadioWatchdogWorker[0]
 Nov 11 12:56:06 127.0.0.1 ywc-watchdog[8567]:       Transmit ended. Resetting timer.
 ```
 
-Here is a sample of live system logs from `ywc-watchdog` running on a Linux host (via `journalctl -u ywc-watchdog`), showing startup configuration, and emergency Shelly relay cutoff actions triggered by a loss of communication to the Yaesu Web Control Api endpoints.:
+Example of live system logs from `ywc-watchdog` running on a Linux host (via `journalctl -u ywc-watchdog`), showing startup configuration, and emergency Shelly relay cutoff actions triggered by a loss of communication to the Yaesu Web Control Api endpoints.:
 
 ```text
 Nov 11 17:49:25 127.0.0.1 systemd[1]: Started ywc-watchdog.service - YWC Watchdog .NET Service for Raspberry Pi.
