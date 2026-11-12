@@ -116,7 +116,7 @@ sudo journalctl -u ywc-watchdog -f
 
 ### Running as a Windows Service
 
-#### Option 1: Using NSSM (Recommended)
+#### Using NSSM (Recommended)
 
 [NSSM (the Non-Sucking Service Manager)](https://nssm.cc) wraps standard console executables cleanly, ensures the working directory is set properly so `appsettings.json` is found, and automatically restarts the app if it crashes.
 
@@ -129,18 +129,6 @@ nssm set ywc-watchdog AppDirectory "C:\ywc-watchdog"
 nssm set ywc-watchdog Description "YWC Watchdog .NET Service"
 nssm set ywc-watchdog Start SERVICE_AUTO_START
 nssm start ywc-watchdog
-```
-
-#### Option 2: Using `sc.exe` (Built-in)
-
-_Note: Only use `sc.exe` if your build includes `Microsoft.Extensions.Hosting.WindowsServices` with `.UseWindowsService()` enabled._
-
-1. Open **Command Prompt as Administrator** and run:
-
-```cmd
-sc.exe create ywc-watchdog binPath= "C:\ywc-watchdog\YwcWatchdog.exe" start= auto
-sc.exe description ywc-watchdog "YWC Watchdog .NET Service"
-sc.exe start ywc-watchdog
 ```
 
 ---
