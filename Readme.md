@@ -35,8 +35,8 @@ sudo curl -fL -o ywc-watchdog-linux-arm64.zip "https://github.com/w8be/ywc-watch
 
 ```bash
 sudo apt-get update && sudo apt-get install -y unzip
-sudo unzip -o ywc-watchdog-release.zip
-sudo rm ywc-watchdog-release.zip
+sudo unzip -o ywc-watchdog-linux-arm64.zip
+sudo rm ywc-watchdog-linux-arm64.zip
 ```
 
 3. Set execution permissions for the compiled binary:
