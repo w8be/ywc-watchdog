@@ -1,6 +1,6 @@
 # ywc-watchdog
 
-`ywc-watchdog` is a lightweight .NET watchdog service designed for `linux-arm64` and `win-x64` to monitor [Yaesu Web Control](https://github.com/mm5agm/Yaesu_Web_Control). The service monitors:
+`ywc-watchdog` is a lightweight .NET watchdog service designed for `linux-arm64` and `win-x64` to monitor [Yaesu Web Control](https://github.com). The service monitors:
 
 - Radio transmit time
 - Radio SWR
@@ -28,7 +28,7 @@ You do not need to build this project from source to run it on your Raspberry Pi
 ```bash
 sudo mkdir -p /opt/ywc-watchdog
 cd /opt/ywc-watchdog
-sudo curl -L -o ywc-watchdog-release.zip "https://github.com/w8be/ywc-watchdog/releases/latest/download/YwcWatchdog-linux-arm64.zip"
+sudo curl -L -o ywc-watchdog-release.zip "https://github.com"
 ```
 
 2. Install `unzip` (if not already installed) and extract the archive:
@@ -55,7 +55,7 @@ sudo nano appsettings.json
 
 ```bash
 # Clone the repository
-git clone https://github.com/w8be/ywc-watchdog.git
+git clone https://github.com
 cd ywc-watchdog
 
 # Publish self-contained executable for Raspberry Pi (64-bit ARM)
@@ -109,10 +109,39 @@ sudo journalctl -u ywc-watchdog -f
 
 ## Installation & Deployment (Windows x64)
 
-1. Create an application directory (e.g., `C:\ywc-watchdog`) and download the latest release package `YwcWatchdog-win-x64.zip` directly from GitHub Releases.
+1. Create an application directory (e.g., `C:\ywc-watchdog`) and download the latest release package `ywc-watchdog-win-x64.zip` directly from GitHub Releases.
 2. Extract the archive into that directory.
 3. Edit `appsettings.json` to configure your Yaesu Web Control IP, Shelly IP, and threshold settings.
-4. Run `YwcWatchdog.exe` to start the application.
+4. Run `YwcWatchdog.exe` directly to test it in a console window.
+
+### Running as a Windows Service
+
+#### Option 1: Using NSSM (Recommended)
+
+[NSSM (the Non-Sucking Service Manager)](https://nssm.cc) wraps standard console executables cleanly, ensures the working directory is set properly so `appsettings.json` is found, and automatically restarts the app if it crashes.
+
+1. Download NSSM and open **Command Prompt** or **PowerShell as Administrator**.
+2. Install and start the service:
+
+```powershell
+nssm install ywc-watchdog "C:\ywc-watchdog\YwcWatchdog.exe"
+nssm set ywc-watchdog AppDirectory "C:\ywc-watchdog"
+nssm set ywc-watchdog Description "YWC Watchdog .NET Service"
+nssm set ywc-watchdog Start SERVICE_AUTO_START
+nssm start ywc-watchdog
+```
+
+#### Option 2: Using `sc.exe` (Built-in)
+
+_Note: Only use `sc.exe` if your build includes `Microsoft.Extensions.Hosting.WindowsServices` with `.UseWindowsService()` enabled._
+
+1. Open **Command Prompt as Administrator** and run:
+
+```cmd
+sc.exe create ywc-watchdog binPath= "C:\ywc-watchdog\YwcWatchdog.exe" start= auto
+sc.exe description ywc-watchdog "YWC Watchdog .NET Service"
+sc.exe start ywc-watchdog
+```
 
 ---
 
