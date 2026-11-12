@@ -104,7 +104,7 @@ You do not need to build this project from source to run it on your Raspberry Pi
 
 ## Installation & Deployment (win-x64)
 
-1. Create your application directory and download the latest release package (`ywc-watchdog-win-x64.zip`) directly from GitHub.
+1. Create your application directory and download the latest release package `ywc-watchdog-win-x64.zip` directly from GitHub.
 
 2. Unzip and extract the archive into that directory.
 
