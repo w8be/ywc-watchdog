@@ -104,11 +104,13 @@ You do not need to build this project from source to run it on your Raspberry Pi
 
 ## Installation & Deployment (win-x64)
 
-1. Create your application directory and download the latest release package (ywc-watchdog-win-x64.zip)directly from GitHub
+1. Create your application directory and download the latest release package (`ywc-watchdog-win-x64.zip`) directly from GitHub.
 
-2. Unzip and extract the archive:
+2. Unzip and extract the archive into that directory.
 
-3. Edit appsettings.json to configure Yaesu Web Control Ip, Shelly IP and threshold settings
+3. Edit `appsettings.json` to configure Yaesu Web Control IP, Shelly IP, and threshold settings.
+
+4. Run `ywc-watchdog.exe` to start the application.
 
 ## Configuration
 
