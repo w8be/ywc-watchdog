@@ -110,7 +110,7 @@ For a complete breakdown of all settings and environment overrides, see **[CONFI
 
 ## Example Output
 
-For ywc-watchdog examples, see \*\*[EXAMPLES.md](./EXAMPLES.md)
+For ywc-watchdog examples, see [EXAMPLES.md](./EXAMPLES.md)
 
 ### License
 
