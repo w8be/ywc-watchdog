@@ -16,17 +16,18 @@ This document details all available configuration options for the Watchdog Servi
 {
   "Logging": {
     "LogLevel": {
-      "Default": "Information",
-      "Microsoft.Hosting.Lifetime": "Information",
-      "System.Net.Http": "Warning"
+      "Default": "Warning",
+      "Microsoft.Hosting.Lifetime": "Warning",
+      "System.Net.Http": "Warning",
+      "RadioWatchdogWorker": "Information"
     }
   },
   "WatchdogSettings": {
-    "YwcApiUrl": "https://127.0.0.1:8443/api/cat/status",
+    "YwcApiUrl": "https://127.0.0.1/api/cat/status",
     "ShellyIp": "127.0.0.1",
     "ShellyDevice": "Shelly Pro4PM",
     "ShellyChannel": 1,
-    "MaxTxDurationMinutes": 2,
+    "MaxTxDurationMinutes": 2.5,
     "MaxSwr": 2.5,
     "AllowedAntennas": [1]
   }
