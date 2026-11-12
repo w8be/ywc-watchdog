@@ -1,6 +1,6 @@
 # ywc-watchdog
 
-`ywc-watchdog` is a lightweight .NET watchdog service designed for `linux-arm64` and `win-x64` to monitor [Yaesu Web Control](https://github.com). The service monitors:
+`ywc-watchdog` is a lightweight .NET watchdog service designed for `linux-arm64` and `win-x64` to monitor [Yaesu Web Control](https://github.com/mm5agm/Yaesu_Web_Control). The service monitors:
 
 - Radio transmit time
 - Radio SWR
