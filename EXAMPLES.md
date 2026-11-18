@@ -4,12 +4,6 @@
 
 Log ouput from `ywc-watchdog` tests :
 
-#ywc-watchdog tests
-
-#ywc-watchdog tests
-
-#ywc-watchdog tests
-
 1.  Startup
 
     ```
