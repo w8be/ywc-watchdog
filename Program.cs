@@ -123,7 +123,6 @@ public class RadioWatchdogWorker : BackgroundService
                             _shutdownTriggered = false;
                         }
 
-                        // Capture the transmitting state returned from EvaluateRadioStateAsync
                         isCurrentlyTransmitting = await EvaluateRadioStateAsync(radioStatus, pollCount);
 
                     }
@@ -195,7 +194,6 @@ public class RadioWatchdogWorker : BackgroundService
                 ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true
             };
 
-            //var client = _httpClientFactory.CreateClient();
             using var client = new HttpClient(handler);
 
             var uri = new Uri(_settings.YwcApiUrl);
@@ -207,7 +205,7 @@ public class RadioWatchdogWorker : BackgroundService
 
             if (response != null)
             {
-                // Map Power
+
                 if (response.PWR != null && response.PWR.Count > 0)
                 {
                     var newPwrPoints = new List<WatchdogSettings.PowerCalibrationPoint>();
@@ -226,7 +224,7 @@ public class RadioWatchdogWorker : BackgroundService
                 }
             }
 
-            // Map SWR
+
             if (response?.SWR != null && response.SWR.Count > 0)
             {
                 var newSwrPoints = new List<WatchdogSettings.SwrCalibrationPoint>(); // Or whatever your SWR point type is named
@@ -262,7 +260,7 @@ public class RadioWatchdogWorker : BackgroundService
 
         if (isTransmitting)
         {
-            // 1. Check if the antenna is allowed FIRST before allowing TX logic to proceed
+            // 1. Check Ant Status
             string activeAntennaStr = status.ActiveVfo == 1 ? status.VfoB?.Antenna ?? "1" : status.VfoA?.Antenna ?? "1";
             string currentMode = status.ActiveVfo == 1 ? status.VfoB?.Mode ?? "LSB" : status.VfoA?.Mode ?? "LSB";
 
@@ -291,9 +289,6 @@ public class RadioWatchdogWorker : BackgroundService
                 await TriggerEmergencyCutoffAsync();
             }
 
-            // Interpolate raw byte to calibrated SWR ratio using configuration mapping
-            // double calibratedSwr = GetCalibratedSwr(status.SwrMeter);
-
             if (calibratedSwr > _settings.MaxSwr)
             {
                 _swrViolationCount++;
@@ -305,10 +300,7 @@ public class RadioWatchdogWorker : BackgroundService
                     await TriggerEmergencyCutoffAsync();
                 }
             }
-            // else
-            // {
-            //     _swrViolationCount = 0;
-            // }
+
         }
         else
         {
@@ -347,7 +339,6 @@ public class RadioWatchdogWorker : BackgroundService
 
         return rawValue;
     }
-
     private double GetCalibratedPwr(double rawValue)
     {
         var points = _settings.PwrCalibration;
@@ -466,12 +457,12 @@ public class RadioWatchdogWorker : BackgroundService
 
             var rpcCommand = new Dictionary<string, object>
         {
-            { "id", 1 }, // Request tracking ID (standard protocol format)
+            { "id", 1 },
             { "src", "ywc-watchdog" },
             { "method", "Switch.Set" },
             { "params", new Dictionary<string, object>
                 {
-                    { "id", _settings.ShellyChannel }, // Dynamic channel from your settings!
+                    { "id", _settings.ShellyChannel },
                     { "on", false }
                 }
             }
@@ -480,11 +471,9 @@ public class RadioWatchdogWorker : BackgroundService
             string jsonPayload = JsonSerializer.Serialize(rpcCommand);
             byte[] bytes = Encoding.UTF8.GetBytes(jsonPayload);
 
-            // Send shutdown command once cleanly
             await ws.SendAsync(new ArraySegment<byte>(bytes), WebSocketMessageType.Text, true, cts.Token);
             _logger.LogCritical("EMERGENCY: Sent WebSocket shutdown command to Shelly channel {Channel}.", _settings.ShellyChannel);
 
-            // Wait a moment, then poll status to verify it actually turned off
             await Task.Delay(500, cts.Token);
             bool? relayState = await CheckShellyRelayStatusAsync();
 
