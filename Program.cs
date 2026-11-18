@@ -273,6 +273,7 @@ public class RadioWatchdogWorker : BackgroundService
             }
             double calibratedPwr = GetCalibratedPwr(status.PowerMeter);
             double calibratedSwr = GetCalibratedSwr(status.SwrMeter);
+
             if (_txStartTime == null)
 
             {
