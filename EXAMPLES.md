@@ -26,7 +26,7 @@ Log ouput from `ywc-watchdog` tests :
     Nov 15 14:28:09 127.0.0.1 ywc-watchdog[34147]: info: RadioWatchdogWorker[0]
     ```
 
-3.       Connect to Shelly [{"ShellyIp": "127.0.0.1"}, {"ShellyChannel": 1}]
+3.        Connect to Shelly [{"ShellyIp": "127.0.0.1"}, {"ShellyChannel": 1}]
 
     ```
     Nov 15 14:28:09 127.0.0.1 ywc-watchdog[34147]:       [CONFIG] Shelly IP: 127.0.0.1 (Channel: 1)
@@ -69,7 +69,7 @@ Log ouput from `ywc-watchdog` tests :
     Nov 15 14:31:05 127.0.0.1 ywc-watchdog[34147]: info: RadioWatchdogWorker[0]
     ```
 
-8.  Track xmit mode (api endpoint /api/cat/status/Activevfo.Mode)
+8.  Track xmit mode (api endpoint /api/cat/status/Activevfo.mode)
     ```
     Nov 15 13:48:13 127.0.0.1 ywc-watchdog[33962]:       Transmit started. Mode: LSB, Power: 5.00, SWR: 1.0
     Nov 15 13:48:16 127.0.0.1 ywc-watchdog[33962]: info: RadioWatchdogWorker[0]
