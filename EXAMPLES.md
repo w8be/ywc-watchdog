@@ -26,7 +26,7 @@ Log ouput from `ywc-watchdog` tests :
     Nov 15 14:28:09 127.0.0.1 ywc-watchdog[34147]: info: RadioWatchdogWorker[0]
     ```
 
-3.        Connect to Shelly [{"ShellyIp": "127.0.0.1"}, {"ShellyChannel": 1}]
+3.  Connect to Shelly [{"ShellyIp": "127.0.0.1"}, {"ShellyChannel": 1}]
 
     ```
     Nov 15 14:28:09 127.0.0.1 ywc-watchdog[34147]:       [CONFIG] Shelly IP: 127.0.0.1 (Channel: 1)
