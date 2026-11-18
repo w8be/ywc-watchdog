@@ -11,9 +11,10 @@ If a threshold is exceeded, `ywc-watchdog` will inhibit transmit. If the inhibit
 ## Features
 
 - **Transceiver Protection:** Continuously monitors TX duration, SWR limits, and antenna selection.
+- **Automated App Calibration**: SWR / Power calibration settings polled on timer.
 - **Fail-Safe Relay Fallback:** Automatically cuts mains power via a Shelly smart relay if CAT transmit inhibit fails.
 - **Cross-Platform:** Runs natively as a background service on Raspberry Pi (`linux-arm64`) and Windows (`win-x64`).
-- **Simple Configuration:** Easily adjustable thresholds and endpoints via `appsettings.json`.
+- **Simple Configuration:** Adjustable thresholds and endpoints via `appsettings.json`.
 
 ---
 
@@ -28,7 +29,7 @@ You do not need to build this project from source to run it on your Raspberry Pi
 ```bash
 sudo mkdir -p /opt/ywc-watchdog
 cd /opt/ywc-watchdog
-sudo curl -fL -o ywc-watchdog-linux-arm64.zip "https://github.com/w8be/ywc-watchdog/releases/download/v1.1.3/YwcWatchdog-linux-arm64.zip"
+sudo curl -fL -o ywc-watchdog-linux-arm64.zip "https://github.com/w8be/ywc-watchdog/releases/download/v1.2.0/YwcWatchdog-linux-arm64.zip"
 ```
 
 2. Install `unzip` (if not already installed) and extract the archive:

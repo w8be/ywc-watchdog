@@ -27,9 +27,10 @@ This document details all available configuration options for the Watchdog Servi
     "ShellyIp": "127.0.0.1",
     "ShellyDevice": "Shelly Pro4PM",
     "ShellyChannel": 1,
-    "MaxTxDurationMinutes": 2.5,
+    "MaxTxDurationMinutes": 2,
     "MaxSwr": 2.5,
-    "AllowedAntennas": [1]
+    "AllowedAntennas": [1],
+    "CalibrateTimerSec": 300
   }
 }
 ```
@@ -40,17 +41,18 @@ This document details all available configuration options for the Watchdog Servi
 
 ### `WatchdogSettings`
 
-Controls CAT polling, Shelly smart relay control, and transmit safety cutoffs.
+Controls YWC api endpoint polling, Radio CAT polling, transmit inhibit on threshold, and Shelly /rpc relay control for failsafe power cutoff.
 
 | Key                    | Type     | Required | Default                                   | Description                                                                                                                                                                                                                                                                                                               |
 | :--------------------- | :------- | :------- | :---------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `YwcApiUrl`            | `string` | **Yes**  | `"https://127.0.0.1:8443/api/cat/status"` | Full URL to the Yaesu Web Control (YWC) CAT status endpoint.                                                                                                                                                                                                                                                              |
-| `ShellyIp`             | `string` | **Yes**  | `"127.0.0.1"`                             | Local IPv4 address of the Shelly relay controlling station/amplifier power.                                                                                                                                                                                                                                               |
+| `YwcApiUrl`            | `string` | **Yes**  | `"https://127.0.0.1:8443/api/cat/status"` | URL to the Yaesu Web Control (YWC) CAT status endpoint.                                                                                                                                                                                                                                                                   |
+| `ShellyIp`             | `string` | **Yes**  | `"127.0.0.1"`                             | Local IPv4 address of the Shelly relay controlling station power.                                                                                                                                                                                                                                                         |
 | `ShellyDevice`         | `string` | **Yes**  | `"Shelly Pro4PM"`                         | Model name of your Shelly relay device. Currently tested with **Shelly Plug (Gen4)** and **Shelly Pro 4PM**.                                                                                                                                                                                                              |
 | `ShellyChannel`        | `int`    | **Yes**  | `1`                                       | 0-based relay channel ID to trip when a fault occurs. Use `0` for single-channel devices (such as the Gen4 Plug) or `0`–`3` for the 4-channel Shelly Pro 4PM.                                                                                                                                                             |
-| `MaxTxDurationMinutes` | `double` | **Yes**  | `2`                                       | Maximum continuous transmit time (in decimal minutes) before the watchdog sends a CAT PTT Off cmd. After 3 attempts a Power off cmd will be sent to the Shelly relay. Accepts decimals for partial minutes (e.g., 0.17 for ~10 seconds, 0.5 for 30 seconds, 2.5 for 2 minutes 30 seconds). Seconds / 60 = Decimal Minutes |
+| `MaxTxDurationMinutes` | `double` | **Yes**  | `2`                                       | Maximum continuous transmit time (in decimal minutes) before the watchdog sends a CAT PTT Off cmd. After 3 attempts a Power off cmd will be sent to the Shelly relay. Accepts decimals for partial minutes. Seconds / 60 = Decimal Minute (e.g., 0.17 for ~10 seconds, 0.5 for 30 seconds, 2.5 for 2 minutes 30 seconds). |
 | `MaxSwr`               | `double` | **Yes**  | `2.5`                                     | Maximum allowed SWR threshold. Exceeding this value during transmit triggers a safety cutoff.                                                                                                                                                                                                                             |
 | `AllowedAntennas`      | `int[]`  | **Yes**  | `[1]`                                     | List of permitted antenna port numbers (e.g., `[1, 2]`). Transmitting on an unlisted antenna triggers a cutoff.                                                                                                                                                                                                           |
+| `CalibrateTimerSec`    | `int`    | **Yes**  | `300`                                     | Value in seconds of the refresh poll timer for meter calibration data.                                                                                                                                                                                                                                                    |
 
 ### `Logging`
 

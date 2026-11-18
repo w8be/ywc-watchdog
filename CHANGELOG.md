@@ -9,6 +9,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Added /api/cat/radioPower and /api/cat/status/mode objects.
+- Added meter Calibrate(Timer/Swr) to YWC api response.
+- Added radio power status form api response.
+- Added status responses to the log
+
+## [1.2.0] -2206-11-15
+
+### Added
+
 - Feature currently in development...
 
 ## [1.1.0] - 2026-11-11

@@ -8,7 +8,7 @@
     <SelfContained>true</SelfContained>
     <RuntimeIdentifier>linux-arm64</RuntimeIdentifier>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <Version>1.1.3</Version>
+    <Version>1.2.0</Version>
     <DebugType>none</DebugType>
     <DebugSymbols>false</DebugSymbols>
   </PropertyGroup>
@@ -21,11 +21,13 @@
 
   <!-- Zip target keeps your release packaged safely -->
 <Target Name="ZipPublishOutput" AfterTargets="Publish" Condition="Exists('$(PublishDir)')">
-    <PropertyGroup>
-      <PublishZipPath>$(MSBuildProjectDirectory)/YwcWatchdog-linux-arm64.zip</PublishZipPath>
-    </PropertyGroup>
-    <Delete Files="$(PublishZipPath)" Condition="Exists('$(PublishZipPath)')" />
-    <ZipDirectory SourceDirectory="$(PublishDir)" DestinationFile="$(PublishZipPath)" Overwrite="true" />
-  </Target>
+  <PropertyGroup>
+    <PublishZipPath>$(MSBuildProjectDirectory)/YwcWatchdog-linux-arm64.zip</PublishZipPath>
+    <CleanPublishDir>$([System.String]::Copy('$(PublishDir)').TrimEnd('\').TrimEnd('/'))</CleanPublishDir>
+  </PropertyGroup>
+  <Delete Files="$(PublishZipPath)" Condition="Exists('$(PublishZipPath)')" />
+  <ZipDirectory SourceDirectory="$(CleanPublishDir)" DestinationFile="$(PublishZipPath)" Overwrite="true" />
+</Target>
+
 
 </Project>

@@ -1,17 +1,12 @@
-using System;
+
 using System.Text;
 using System.Net.WebSockets;
-using System.Collections.Generic;
-using System.Net.Http;
 using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using System.Threading;
-using System.Threading.Tasks;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using System.Reflection;
+
 
 var builder = Host.CreateApplicationBuilder(args);
 
@@ -33,9 +28,20 @@ builder.Services.Configure<WatchdogSettings>(builder.Configuration.GetSection("W
 builder.Services.AddHostedService<RadioWatchdogWorker>();
 
 var host = builder.Build();
+
+var logger = host.Services.GetRequiredService<ILogger<Program>>();
+
+if (logger.IsEnabled(LogLevel.Information))
+{
+    var releaseId = Assembly.GetEntryAssembly()?
+        .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?
+        .InformationalVersion ?? "unknown";
+
+    logger.LogInformation("Application starting up. ReleaseId: {ReleaseId}", releaseId);
+}
+
 host.Run();
 
-// 2. Worker Service
 public class RadioWatchdogWorker : BackgroundService
 {
     private readonly ILogger<RadioWatchdogWorker> _logger;
@@ -43,28 +49,63 @@ public class RadioWatchdogWorker : BackgroundService
     private readonly WatchdogSettings _settings;
     private int _swrViolationCount = 0;
     private DateTime? _txStartTime = null;
+    private DateTime _calibrationTimer = DateTime.MinValue;
+    public bool IsRadioPowerOn { get; private set; }
+    private bool? _lastLoggedPowerState;
+    private DateTime _powerPollTimer = DateTime.MinValue;
 
     public RadioWatchdogWorker(
         ILogger<RadioWatchdogWorker> logger,
         IHttpClientFactory httpClientFactory,
-        IOptions<WatchdogSettings> settings)
+        IOptions<WatchdogSettings> settings
+        )
+
     {
         _logger = logger;
         _httpClientFactory = httpClientFactory;
         _settings = settings.Value;
     }
     private bool _shutdownTriggered = false;
+
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
+
         _logger.LogInformation("Starting YWC REST Watchdog Service polling status endpoint...");
         _logger.LogInformation("[CONFIG] Polling API: {Url}", _settings.YwcApiUrl);
         _logger.LogInformation("[CONFIG] Shelly IP: {Ip} (Channel: {Channel})", _settings.ShellyIp, _settings.ShellyChannel);
         _logger.LogInformation("[CONFIG] Max TX Duration: {Duration} minutes", _settings.MaxTxDurationMinutes);
+        _logger.LogInformation("[CONFIG] Permitted Antennas: [{Antennas}]", string.Join(", ", _settings.AllowedAntennas));
         _logger.LogInformation("[CONFIG] Max Allowed SWR Meter: {Swr}", _settings.MaxSwr);
-        _logger.LogInformation("[CONFIG] Allowed Antennas: [{Antennas}]", string.Join(", ", _settings.AllowedAntennas));
+        _logger.LogInformation("[CONFIG] Meter Calibration Timer: {CalibrateTimerSec} seconds", _settings.CalibrateTimerSec);
+        _logger.LogInformation("[CONFIG] SWR Meter Calibration Values: {Swr}", string.Join(", ", _settings.SwrCalibration.Select(p => $"Raw {p.Raw} -> SWR {p.Swr}")));
+        _logger.LogInformation("[CONFIG] PWR Meter Calibration Values: {Pwr}", string.Join(", ", _settings.PwrCalibration.Select(p => $"Raw {p.Raw} -> PWR {p.Pwr}")));
+        _logger.LogInformation("[CONFIG] Initialization Complete");
+
+        await UpdateCalibrationAsync(stoppingToken);
+
+        _calibrationTimer = DateTime.UtcNow;
+        bool isCurrentlyTransmitting = false;
+
+        long pollCount = 0;
 
         while (!stoppingToken.IsCancellationRequested)
         {
+            pollCount++;
+
+            // 1. Calibration check (runs every x seconds)
+            if ((DateTime.UtcNow - _calibrationTimer).TotalSeconds >= _settings.CalibrateTimerSec)
+            {
+                await UpdateCalibrationAsync(stoppingToken);
+                _calibrationTimer = DateTime.UtcNow;
+            }
+
+            // 2. Radio power check (runs every 1 second)
+            if ((DateTime.UtcNow - _powerPollTimer).TotalSeconds >= 1)
+            {
+                await UpdateRadioPowerAsync(stoppingToken);
+                _powerPollTimer = DateTime.UtcNow;
+            }
+
             try
             {
                 var client = _httpClientFactory.CreateClient("RadioClient");
@@ -74,51 +115,156 @@ public class RadioWatchdogWorker : BackgroundService
                 {
                     var radioStatus = await response.Content.ReadFromJsonAsync<RadioStatus>(cancellationToken: stoppingToken);
                     if (radioStatus != null)
+
                     {
-                        // 2. If connection is back and we were previously shutdown, reset the flag
                         if (_shutdownTriggered)
                         {
                             _logger.LogInformation("Radio API connection restored. Resetting watchdog state.");
                             _shutdownTriggered = false;
                         }
 
-                        await EvaluateRadioStateAsync(radioStatus);
+                        // Capture the transmitting state returned from EvaluateRadioStateAsync
+                        isCurrentlyTransmitting = await EvaluateRadioStateAsync(radioStatus, pollCount);
+
                     }
                 }
                 else
                 {
                     _logger.LogWarning("Failed to poll radio status. HTTP Status: {StatusCode}", response.StatusCode);
+                    isCurrentlyTransmitting = false;
                 }
             }
             catch (Exception ex)
             {
-                // 3. Only trigger and log on the FIRST failure of the outage
                 if (!_shutdownTriggered)
                 {
                     _logger.LogError(ex, "Error occurred while polling radio status API. Triggering emergency Shelly shutdown due to lost communication!");
-
                     await TriggerShellyShutdownAsync();
-
-                    _shutdownTriggered = true; // Locks it out from spamming every second!
+                    _shutdownTriggered = true;
                 }
                 else
                 {
-                    // Optional: Debug log so it doesn't completely blind you, but keeps error logs silent
                     _logger.LogDebug("Radio API still offline. Shutdown already triggered.");
+                }
+                isCurrentlyTransmitting = false;
+            }
+
+            // short/long delay: 200ms when transmitting to catch SSB voice/SWR peaks, 1 second when idle
+            int delayMs = isCurrentlyTransmitting ? 200 : 1000;
+            await Task.Delay(delayMs, stoppingToken);
+        }
+    }
+
+    private async Task UpdateRadioPowerAsync(CancellationToken stoppingToken)
+    {
+        try
+        {
+            var client = _httpClientFactory.CreateClient("RadioClient");
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            var ywcBaseUrl = new Uri(_settings.YwcApiUrl).GetLeftPart(UriPartial.Authority);
+
+            var powerStatus = await client.GetFromJsonAsync<PowerStatusResponse>(
+                $"{ywcBaseUrl}/api/cat/radiopower", options, stoppingToken);
+
+            if (powerStatus != null)
+            {
+                IsRadioPowerOn = powerStatus.PowerOn;
+                string radioState = IsRadioPowerOn ? "On" : "Off";
+
+                if (_lastLoggedPowerState != IsRadioPowerOn)
+                {
+                    _logger.LogInformation("[CONFIG] Radio Power Status: {RadioPower}", radioState);
+                    _lastLoggedPowerState = IsRadioPowerOn;
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogDebug(ex, "Failed to poll radio power endpoint.");
+            //_logger.LogWarning("Failed to poll radio power endpoint: {Message}", ex.Message);
+        }
+    }
+
+    private async Task UpdateCalibrationAsync(CancellationToken stoppingToken)
+    {
+        try
+
+        {
+            var handler = new HttpClientHandler
+            {
+                ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true
+            };
+
+            //var client = _httpClientFactory.CreateClient();
+            using var client = new HttpClient(handler);
+
+            var uri = new Uri(_settings.YwcApiUrl);
+            string ywcBaseUrl = $"{uri.Scheme}://{uri.Authority}";
+
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+
+            var response = await client.GetFromJsonAsync<CalibrationApiResponse>($"{ywcBaseUrl}/api/calibration/all", new JsonSerializerOptions { PropertyNameCaseInsensitive = true }, stoppingToken);
+
+            if (response != null)
+            {
+                // Map Power
+                if (response.PWR != null && response.PWR.Count > 0)
+                {
+                    var newPwrPoints = new List<WatchdogSettings.PowerCalibrationPoint>();
+                    foreach (var entry in response.PWR)
+                    {
+                        if (double.TryParse(entry.Radio, out double powerVal))
+                        {
+                            newPwrPoints.Add(new WatchdogSettings.PowerCalibrationPoint((int)entry.Raw, powerVal));
+                        }
+                    }
+                    if (newPwrPoints.Count > 0)
+                    {
+                        _settings.PwrCalibration = newPwrPoints;
+                        _logger.LogInformation("Successfully applied {Count} PWR calibration points from API.", newPwrPoints.Count);
+                    }
                 }
             }
 
-            await Task.Delay(TimeSpan.FromSeconds(1), stoppingToken);
+            // Map SWR
+            if (response?.SWR != null && response.SWR.Count > 0)
+            {
+                var newSwrPoints = new List<WatchdogSettings.SwrCalibrationPoint>(); // Or whatever your SWR point type is named
+                foreach (var entry in response.SWR)
+                {
+                    if (double.TryParse(entry.Radio, out double swrVal))
+                    {
+                        newSwrPoints.Add(new WatchdogSettings.SwrCalibrationPoint((int)entry.Raw, swrVal));
+                    }
+                }
+                if (newSwrPoints.Count > 0)
+                {
+                    _settings.SwrCalibration = newSwrPoints;
+                    _logger.LogInformation("Successfully applied {Count} SWR calibration points from API.", newSwrPoints.Count);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Failed to fetch live calibration points from YWC app.");
         }
     }
-    private async Task EvaluateRadioStateAsync(RadioStatus status)
+    private async Task<bool> EvaluateRadioStateAsync(RadioStatus status, long pollCount)
     {
-        bool isTransmitting = status.PowerMeter > 0;
+        var client = _httpClientFactory.CreateClient("RadioClient");
+        var txUrl = _settings.YwcApiUrl.Replace("/status", "/tx");
+
+        var responseString = await client.GetStringAsync(txUrl);
+        var txStatus = JsonSerializer.Deserialize<TxStatus>(responseString);
+        var modeStatus = JsonSerializer.Deserialize<VfoStatus>(responseString);
+
+        bool isTransmitting = txStatus?.Transmitting ?? false;
 
         if (isTransmitting)
         {
             // 1. Check if the antenna is allowed FIRST before allowing TX logic to proceed
             string activeAntennaStr = status.ActiveVfo == 1 ? status.VfoB?.Antenna ?? "1" : status.VfoA?.Antenna ?? "1";
+            string currentMode = status.ActiveVfo == 1 ? status.VfoB?.Mode ?? "LSB" : status.VfoA?.Mode ?? "LSB";
 
             if (int.TryParse(activeAntennaStr, out int currentAntenna))
             {
@@ -126,14 +272,16 @@ public class RadioWatchdogWorker : BackgroundService
                 {
                     _logger.LogCritical("Invalid Antenna detected ({Antenna}) during transmission. Executing emergency cutoff!", currentAntenna);
                     await TriggerEmergencyCutoffAsync();
-                    return;
+                    return false;
                 }
             }
-
+            double calibratedPwr = GetCalibratedPwr(status.PowerMeter);
+            double calibratedSwr = GetCalibratedSwr(status.SwrMeter);
             if (_txStartTime == null)
+
             {
                 _txStartTime = DateTime.UtcNow;
-                _logger.LogInformation("Transmit started. Power: {Power}, Raw SWR: {RawSwr}", status.PowerMeter, status.SwrMeter);
+                _logger.LogInformation("Transmit started. Mode: {ModeStatus}, Power: {CalibratedPwr:F2}, SWR: {CalibratedSwr:F1}", currentMode, calibratedPwr, calibratedSwr);
             }
 
             var txDuration = (DateTime.UtcNow - _txStartTime.Value).TotalMinutes;
@@ -144,12 +292,12 @@ public class RadioWatchdogWorker : BackgroundService
             }
 
             // Interpolate raw byte to calibrated SWR ratio using configuration mapping
-            double calibratedSwr = GetCalibratedSwr(status.SwrMeter);
+            // double calibratedSwr = GetCalibratedSwr(status.SwrMeter);
 
             if (calibratedSwr > _settings.MaxSwr)
             {
                 _swrViolationCount++;
-                _logger.LogWarning("High SWR detected: {CalibratedSwr:F2} (Raw: {Raw}, Violation count: {Count})", calibratedSwr, status.SwrMeter, _swrViolationCount);
+                _logger.LogWarning("High SWR detected: {CalibratedSwr:F2}, Violation count: {Count})", calibratedSwr, _swrViolationCount);
 
                 if (_swrViolationCount >= 2)
                 {
@@ -157,10 +305,10 @@ public class RadioWatchdogWorker : BackgroundService
                     await TriggerEmergencyCutoffAsync();
                 }
             }
-            else
-            {
-                _swrViolationCount = 0;
-            }
+            // else
+            // {
+            //     _swrViolationCount = 0;
+            // }
         }
         else
         {
@@ -171,6 +319,8 @@ public class RadioWatchdogWorker : BackgroundService
                 _swrViolationCount = 0;
             }
         }
+
+        return isTransmitting;
     }
 
     private double GetCalibratedSwr(double rawValue)
@@ -191,7 +341,32 @@ public class RadioWatchdogWorker : BackgroundService
             if (rawValue >= p1.Raw && rawValue <= p2.Raw)
             {
                 double ratio = (double)(rawValue - p1.Raw) / (p2.Raw - p1.Raw);
-                return p1.Swr + ratio * (p2.Swr - p2.Swr);
+                return p1.Swr + ratio * (p2.Swr - p1.Swr);
+            }
+        }
+
+        return rawValue;
+    }
+
+    private double GetCalibratedPwr(double rawValue)
+    {
+        var points = _settings.PwrCalibration;
+
+        if (points == null || points.Count == 0)
+            return rawValue;
+
+        if (rawValue <= points[0].Raw) return points[0].Pwr;
+        if (rawValue >= points[^1].Raw) return points[^1].Pwr;
+
+        for (int i = 0; i < points.Count - 1; i++)
+        {
+            var p1 = points[i];
+            var p2 = points[i + 1];
+
+            if (rawValue >= p1.Raw && rawValue <= p2.Raw)
+            {
+                double ratio = (double)(rawValue - p1.Raw) / (p2.Raw - p1.Raw);
+                return p1.Pwr + ratio * (p2.Pwr - p1.Pwr);
             }
         }
 
@@ -328,7 +503,15 @@ public class RadioWatchdogWorker : BackgroundService
         }
     }
 }
-
+public class PowerStatusResponse
+{
+    public bool PowerOn { get; set; }
+}
+public class TxStatus
+{
+    [JsonPropertyName("transmitting")]
+    public bool Transmitting { get; set; }
+}
 public class RadioStatus
 {
     [JsonPropertyName("isConnected")]
@@ -348,8 +531,8 @@ public class RadioStatus
 
     [JsonPropertyName("vfoB")]
     public VfoStatus? VfoB { get; set; }
-}
 
+}
 public class VfoStatus
 {
     [JsonPropertyName("frequency")]
@@ -357,8 +540,10 @@ public class VfoStatus
 
     [JsonPropertyName("antenna")]
     public string Antenna { get; set; } = "1";
-}
 
+    [JsonPropertyName("mode")]
+    public string Mode { get; set; } = "LSB";
+}
 public class WatchdogSettings
 {
     public string YwcApiUrl { get; set; } = string.Empty;
@@ -368,6 +553,7 @@ public class WatchdogSettings
     public double MaxTxDurationMinutes { get; set; } = 0.17;
     public List<int> AllowedAntennas { get; set; } = new();
     public double MaxSwr { get; set; } = 2.5;
+    public int CalibrateTimerSec { get; set; } = 300;
 
     public List<SwrCalibrationPoint> SwrCalibration { get; set; } = new()
     {
@@ -378,6 +564,51 @@ public class WatchdogSettings
         new(173, 5.0),
         new(242, 9.9)
     };
-}
+    //}
 
-public record SwrCalibrationPoint(int Raw, double Swr);
+    public record SwrCalibrationPoint(int Raw, double Swr);
+
+    public List<PowerCalibrationPoint> PwrCalibration { get; set; } = new()
+    {
+       // new(0,0),
+        new(30, 5),
+        new(76, 25),
+        new(112, 50),
+        new(157, 100),
+        new(190, 150),
+        new(222, 200)
+    };
+
+    public record PowerCalibrationPoint(int Raw, double Pwr);
+}
+public class CalibrationApiResponse
+{
+    public List<CalibrationEntry> PWR { get; set; } = new();
+    public List<CalibrationEntry> SWR { get; set; } = new();
+
+    //     [JsonPropertyName("Compression")]
+    //     public List<CalibrationEntry> Compression { get; set; } = new();
+
+    //     [JsonPropertyName("ALC")]
+    //     public List<CalibrationEntry> ALC { get; set; } = new();
+
+    //     [JsonPropertyName("TPA")]
+    //     public List<CalibrationEntry> TPA { get; set; } = new();
+
+    //     [JsonPropertyName("IDD")]
+    //     public List<CalibrationEntry> IDD { get; set; } = new();
+
+    //     [JsonPropertyName("VPA")]
+    //     public List<CalibrationEntry> VPA { get; set; } = new();
+
+    //     [JsonPropertyName("S-Meter")]
+    //     public List<CalibrationEntry> SMeter { get; set; } = new();
+}
+public class CalibrationEntry
+{
+    [JsonPropertyName("Radio")]
+    public string Radio { get; set; } = string.Empty;
+
+    [JsonPropertyName("raw")]
+    public double Raw { get; set; }
+}
