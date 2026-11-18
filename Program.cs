@@ -180,7 +180,6 @@ public class RadioWatchdogWorker : BackgroundService
         catch (Exception ex)
         {
             _logger.LogDebug(ex, "Failed to poll radio power endpoint.");
-            //_logger.LogWarning("Failed to poll radio power endpoint: {Message}", ex.Message);
         }
     }
 
@@ -260,7 +259,6 @@ public class RadioWatchdogWorker : BackgroundService
 
         if (isTransmitting)
         {
-            // 1. Check Ant Status
             string activeAntennaStr = status.ActiveVfo == 1 ? status.VfoB?.Antenna ?? "1" : status.VfoA?.Antenna ?? "1";
             string currentMode = status.ActiveVfo == 1 ? status.VfoB?.Mode ?? "LSB" : status.VfoA?.Mode ?? "LSB";
 
@@ -417,7 +415,6 @@ public class RadioWatchdogWorker : BackgroundService
 
             await ws.SendAsync(new ArraySegment<byte>(bytes), WebSocketMessageType.Text, true, cts.Token);
 
-            // Receive response buffer
             var buffer = new byte[1024];
             var result = await ws.ReceiveAsync(new ArraySegment<byte>(buffer), cts.Token);
 
@@ -426,11 +423,10 @@ public class RadioWatchdogWorker : BackgroundService
                 string responseString = Encoding.UTF8.GetString(buffer, 0, result.Count);
                 using var doc = JsonDocument.Parse(responseString);
 
-                // Look for the output property in the result object
                 if (doc.RootElement.TryGetProperty("result", out var resElement) &&
                     resElement.TryGetProperty("output", out var outputElement))
                 {
-                    return outputElement.GetBoolean(); // true = ON, false = OFF
+                    return outputElement.GetBoolean();
                 }
             }
         }
@@ -439,7 +435,7 @@ public class RadioWatchdogWorker : BackgroundService
             _logger.LogWarning(ex, "Failed to poll Shelly status via WebSocket.");
         }
 
-        return null; // Status unknown
+        return null;
     }
 
     private async Task TriggerShellyShutdownAsync()
@@ -553,8 +549,6 @@ public class WatchdogSettings
         new(173, 5.0),
         new(242, 9.9)
     };
-    //}
-
     public record SwrCalibrationPoint(int Raw, double Swr);
 
     public List<PowerCalibrationPoint> PwrCalibration { get; set; } = new()
