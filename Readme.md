@@ -8,6 +8,8 @@
 
 If a threshold is exceeded, `ywc-watchdog` will inhibit transmit. If the inhibit command fails, `ywc-watchdog` will fall back to disconnecting mains power via a Shelly relay.
 
+> [!WARNING] > **Use at your own risk.** `ywc-watchdog` is a secondary safeguard, not a guaranteed protection system. Network delays, hardware faults, or misconfiguration can prevent timely transmit inhibit or relay cutoff. You remain solely responsible for equipment safety and amateur radio control-operator compliance. See [LICENSE](LICENSE) for full terms.
+
 ## Features
 
 - **Transceiver Protection:** Continuously monitors TX duration, SWR limits, and antenna selection.
@@ -143,6 +145,16 @@ For a complete breakdown of all settings and environment overrides, see **[CONFI
 ## Example Output
 
 For `ywc-watchdog` examples, see **[EXAMPLES.md](./EXAMPLES.md)**.
+
+## ⚠️ Disclaimer
+
+**Use at your own risk.** This software interfaces with amateur radio transceivers and mains power relays (Shelly) to monitor and interrupt transmissions.
+
+- **No Guarantee of Protection:** Network latency, API failures, misconfigured thresholds, or hardware issues may prevent `ywc-watchdog` from inhibiting transmit or cutting power in time to prevent damage to your transceiver, amplifier, or antenna system.
+- **Mains Power Hazard:** Cutting mains power abruptly via a smart relay can cause equipment damage or data loss if not properly configured for your station setup. Always verify your relay wiring, ratings, and fail-safe behaviors.
+- **Control Operator Responsibility:** You remain solely responsible for compliance with all applicable amateur radio regulations (including FCC Part 97 or local equivalents) and safe station operation. Automated monitoring is a secondary safeguard, not a replacement for an attentive control operator.
+
+Provided "AS IS" without warranty of any kind. See the [LICENSE](LICENSE) file for full terms.
 
 ## License
 
