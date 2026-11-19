@@ -154,8 +154,6 @@ For `ywc-watchdog` examples, see **[EXAMPLES.md](./EXAMPLES.md)**.
 - **Mains Power Hazard:** Cutting mains power abruptly via a smart relay can cause equipment damage or data loss if not properly configured for your station setup. Always verify your relay wiring, ratings, and fail-safe behaviors.
 - **Control Operator Responsibility:** You remain solely responsible for compliance with all applicable amateur radio regulations (including FCC Part 97 or local equivalents) and safe station operation. Automated monitoring is a secondary safeguard, not a replacement for an attentive control operator.
 
-Provided "AS IS" without warranty of any kind. See the [LICENSE](LICENSE) file for full terms.
-
 ## License
 
 Distributed under the MIT License. See [LICENSE](LICENSE) for more information.
