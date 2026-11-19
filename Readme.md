@@ -158,4 +158,6 @@ Provided "AS IS" without warranty of any kind. See the [LICENSE](LICENSE) file f
 
 ## License
 
-Distributed under the MIT License. See `LICENSE` for more information.
+## License
+
+Distributed under the MIT License. See [LICENSE](LICENSE) for more information.
