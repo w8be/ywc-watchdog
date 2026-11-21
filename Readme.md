@@ -14,7 +14,7 @@ If a threshold is exceeded, `ywc-watchdog` will inhibit transmit. If the inhibit
 ## Features
 
 - **Transceiver Protection:** Continuously monitors TX duration, SWR limits, and antenna selection.
-- **Automated App Calibration**: SWR / Power calibration settings polled on timer.
+- **Automated App Calibration**: SWR / Power / Temperature calibration settings polled on timer.
 - **Fail-Safe Relay Fallback:** Automatically cuts mains power via a Shelly smart relay if CAT transmit inhibit fails.
 - **Cross-Platform:** Runs natively as a background service on Raspberry Pi (`linux-arm64`) and Windows (`win-x64`).
 - **Simple Configuration:** Adjustable thresholds and endpoints via `appsettings.json`.
