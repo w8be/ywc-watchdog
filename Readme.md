@@ -2,9 +2,10 @@
 
 `ywc-watchdog` is a lightweight .NET watchdog service designed for `linux-arm64` and `win-x64` to monitor [Yaesu Web Control](https://github.com/mm5agm/Yaesu_Web_Control). The service monitors:
 
-- Radio transmit time
+- Radio Antennas
+- Radio Power
 - Radio SWR
-- Radio antennas
+- Radio Temperature
 
 If a threshold is exceeded, `ywc-watchdog` will inhibit transmit. If the inhibit command fails, `ywc-watchdog` will fall back to disconnecting mains power via a Shelly relay.
 
@@ -31,7 +32,7 @@ You do not need to build this project from source to run it on your Raspberry Pi
 ```bash
 sudo mkdir -p /opt/ywc-watchdog
 cd /opt/ywc-watchdog
-sudo curl -fL -o ywc-watchdog-linux-arm64.zip "https://github.com/w8be/ywc-watchdog/releases/download/v1.2.0/YwcWatchdog-linux-arm64.zip"
+sudo curl -fL -o ywc-watchdog-linux-arm64.zip "https://github.com/w8be/ywc-watchdog/releases/download/v1.3.0/YwcWatchdog-linux-arm64.zip"
 ```
 
 2. Install `unzip` (if not already installed) and extract the archive:
