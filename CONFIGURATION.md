@@ -31,8 +31,7 @@ This document details all available configuration options for the Watchdog Servi
     "MaxSwr": 2.5,
     "MaxTmp": 60,
     "AllowedAntennas": [1],
-    "CalibrateTimerSec": 300,
-    "TempCalibrationPoint": 30
+    "CalibrateTimerSec": 300
   }
 }
 ```
