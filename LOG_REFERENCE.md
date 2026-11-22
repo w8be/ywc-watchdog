@@ -15,7 +15,7 @@
 - [11. Inhibit High SWR](#inhibit-on-high-swr-api-endpoint-apicalibrationall-maxswr-25)
 - [12. Inhibit Hugh Temperature](#inhibit-on-high-temp-api-enpoint-apicalibrationall-maxtmp-30)
 - [13. Inhibit Max TX Duration](#inhibit-on-maxdurationtx-threshold-maxtxdurationminutes-005)
-- [14. Shelly Failover Test](#14-failover-to-shelly-on-api-endpoint-loss-of-communication-docker-compose-down-ywc)
+- [14. Shelly Failover Test](#failover-to-shelly-on-api-endpoint-loss-of-communication-docker-compose-down-ywc)
 - [15. Confirm YWC - ywc-watchdog API restore](#confirm-ywc-api-endpoint-on-restore-communications)
 
 1.  ### Startup
