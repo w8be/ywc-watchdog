@@ -11,9 +11,9 @@
  [7. Measure YWC - ywc-watchdog cycle](#mesure-ywc---ywc-watchdog-calibration-cycle-completion-calibratetimersec-300)\
  [8. Track Radio Power](#track-pwr-onoff-status-api-endpoint-apicatradiopower)\
  [9. Track Transmit Mode](#track-transmit-mode-status-api-endpoint-apicatstatusactivevfomode)\
- [10. Inhibit Invalid Antenna](#inhibit-on-invalid-antenna-api-endpoint-apicatstatusactivevfoantenna-allowedantennas-1)\
- [11. Inhibit High SWR](#inhibit-on-high-swr-api-endpoint-apicalibrationall-maxswr-25)\
- [12. Inhibit High Temperature](#inhibit-on-high-temp-api-enpoint-apicalibrationall-maxtmp-30)\
+ [10. Inhibit Invalid Antenna](#inhibit-on-invalid-antenna-allowedantennas-1)\
+ [11. Inhibit High SWR](#inhibit-on-high-swr-maxswr-25)\
+ [12. Inhibit High Temperature](#inhibit-on-high-temp-maxtmp-30)\
  [13. Inhibit Max TX Duration](#inhibit-on-maxdurationtx-threshold-maxtxdurationminutes-005)\
  [14. Shelly Failover Test](#failover-to-shelly-on-api-endpoint-loss-of-communication-docker-compose-down-ywc)\
  [15. Confirm YWC - ywc-watchdog API restore](#confirm-ywc-api-endpoint-on-restore-communications)
@@ -116,7 +116,7 @@
     Nov 21 19:26:37 127.0.0.1 ywc-watchdog[51051]:       Transmit ended. Resetting timer.
     Nov 21 19:27:07 127.0.0.1 ywc-watchdog[51051]: info: RadioWatchdogWorker[0]
     ```
-10. ### Inhibit on invalid antenna [api endpoint: /api/cat/status/Activevfo.Antenna {"AllowedAntennas": [1]}]
+10. ### Inhibit on invalid antenna {"AllowedAntennas": [1]}
 
     ```yaml
     Nov 21 08:21:19 127.0.0.1 ywc-watchdog[49644]:       Invalid Antenna detected (2) during transmission. Executing emergency cutoff!
@@ -125,7 +125,7 @@
     Nov 21 08:21:31 127.0.0.1 ywc-watchdog[49644]: info: RadioWatchdogWorker[0]
     ```
 
-11. ### Inhibit on high swr [api endpoint: /api/calibration/all {MaxSwr: 2.5}]
+11. ### Inhibit on high swr {MaxSwr: 2.5}
 
     ```yaml
     Nov 21 19:27:22 127.0.0.1 ywc-watchdog[51051]:       Transmit started. Mode: LSB, Power: 5.00, SWR: 1.1, Temp: 38.3
@@ -141,7 +141,7 @@
     Nov 21 19:27:23 127.0.0.1 ywc-watchdog[51051]:       Transmit ended. Resetting timer.
     ```
 
-12. ### Inhibit on high Temp [api enpoint: /api/calibration/all {MaxTmp: 30}]
+12. ### Inhibit on high Temp {MaxTmp: 30}
 
     ```yaml
     Nov 21 08:21:31 127.0.0.1 ywc-watchdog[49644]:       Transmit started. Mode: LSB, Power: 5.00, SWR: 1.1, Temp: 39.6
