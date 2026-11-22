@@ -2,14 +2,30 @@
 
 ## Log Output Reference
 
-1.  Startup
+- [1. Startup](#startup)
+- [2. Connect to ywc](#connect-to-ywc-ywcapiurl-https1270018443)
+- [3. Connect to Shelly](#connect-to-shelly-shellyip-127001-shellychannel-1)
+- [4. Read ywc-watchdog settings](#read-ywc-watchdog-settings-appsettingsjson)
+- [5. Read Pwr,Swr,Temp Calibration](#read-pwrswrtemp-calibration-api-endpoint-catstatus)
+- [6. Apply Pwr,Swr,Temp Calibraion](#apply-pwrswrtemp-calibration)
+- [7. Measure YWC - ywc-watchdog cycle](#mesure-ywc---ywc-watchdog-calibration-cycle-completion-calibratetimersec-300)
+- [8. Track Radio Power](#track-pwr-onoff-status-api-endpoint-apicatradiopower)
+- [9. Track Transmit Mode](#track-transmit-mode-status-api-endpoint-apicatstatusactivevfomode)
+- [10. Inhibit Invalid Antenna](#inhibit-on-invalid-antenna-api-endpoint-apicatstatusactivevfoantenna-allowedantennas-1)
+- [11. Inhibit High SWR](#inhibit-on-high-swr-api-endpoint-apicalibrationall-maxswr-25)
+- [12. Inhibit Hugh Temperature](#inhibit-on-high-temp-api-enpoint-apicalibrationall-maxtmp-30)
+- [13. Inhibit Max TX Duration](#inhibit-on-maxdurationtx-threshold-maxtxdurationminutes-005)
+- [14. Shelly Failover Test](#14-failover-to-shelly-on-api-endpoint-loss-of-communication-docker-compose-down-ywc)
+- [15. Confirm YWC - ywc-watchdog API restore](#confirm-ywc-api-endpoint-on-restore-communications)
+
+1.  ### Startup
 
     ```yaml
     Nov 21 10:15:55 127.0.0.1 ywc-watchdog[50059]:       Application starting up. ReleaseId: 1.3.0
     Nov 21 10:15:55 127.0.0.1 ywc-watchdog[50059]: info: RadioWatchdogWorker[0]
     ```
 
-2.  Connect to ywc {"YwcApiUrl": "https://127.0.0.1:8443"}
+2.  ### Connect to ywc {"YwcApiUrl": "https://127.0.0.1:8443"}
 
     ```yaml
     Nov 21 10:15:55 127.0.0.1 ywc-watchdog[50059]:       Starting YWC REST Watchdog Service polling status endpoint...
@@ -18,14 +34,14 @@
     Nov 21 10:15:55 127.0.0.1 ywc-watchdog[50059]: info: RadioWatchdogWorker[0]
     ```
 
-3.  Connect to Shelly {"ShellyIp": "127.0.0.1"}, {"ShellyChannel": 1}
+3.  ### Connect to Shelly {"ShellyIp": "127.0.0.1"}, {"ShellyChannel": 1}
 
     ```yaml
     Nov 21 10:15:55 127.0.0.1 ywc-watchdog[50059]:       [CONFIG] Shelly IP: 127.0.0.1 (Channel: 0)
     Nov 21 10:15:55 127.0.0.1 ywc-watchdog[50059]: info: RadioWatchdogWorker[0]
     ```
 
-4.  Read ywc-watchdog settings [appsettings.json]:
+4.  ### Read ywc-watchdog settings [appsettings.json]:
 
     ```yaml
     Nov 21 10:15:55 127.0.0.1 ywc-watchdog[50059]:       [CONFIG] Permitted Antennas: [1]
@@ -40,7 +56,7 @@
     Nov 21 10:15:55 127.0.0.1 ywc-watchdog[50059]: info: RadioWatchdogWorker[0]
     ```
 
-5.  Read Pwr/Swr/Temp calibration [api endpoint: /cat/status]:
+5.  ### Read Pwr/Swr/Temp calibration [api endpoint: /cat/status]:
     ```yaml
     Nov 21 10:18:56 Argon5 ywc-watchdog[50112]:       [CONFIG] SWR Meter Calibration Values: Raw 0 -> SWR 1, Raw 51 -> SWR 1.5, Raw 77 -> SWR 2, Raw 128 -> SWR 3, Raw 173 -> SWR 5, Raw 242 -> SWR 9.9
     Nov 21 10:18:56 Argon5 ywc-watchdog[50112]: info: RadioWatchdogWorker[0]
@@ -49,7 +65,7 @@
     Nov 21 10:18:56 Argon5 ywc-watchdog[50112]:       [CONFIG] Temp Meter Calibration Values: Raw 14 ->  TMP 0, Raw 60 ->  TMP 20, Raw 106 ->  TMP 40, Raw 152 ->  TMP 60, Raw 198 ->  TMP 80, Raw 244 ->  TMP 100
     Nov 21 10:18:56 Argon5 ywc-watchdog[50112]: info: RadioWatchdogWorker[0]
     ```
-6.  Apply Pwr/Swr/Temp calibration:
+6.  ### Apply Pwr/Swr/Temp calibration:
     ```yaml
     Nov 21 10:18:56 Argon5 ywc-watchdog[50112]:       [CONFIG] 5 API Power calibration points applied.
     Nov 21 10:18:56 Argon5 ywc-watchdog[50112]: info: RadioWatchdogWorker[0]
@@ -58,7 +74,7 @@
     Nov 21 10:18:56 Argon5 ywc-watchdog[50112]:       [Config] 6 Temp calibration points applied.
     Nov 21 10:18:56 Argon5 ywc-watchdog[50112]: info: RadioWatchdogWorker[0]
     ```
-7.  Mesure YWC - ywc-watchdog calibration cycle completion {"CalibrateTimerSec": 300}
+7.  ### Mesure YWC - ywc-watchdog calibration cycle completion {"CalibrateTimerSec": 300}
 
     ```yaml
     Nov 21 10:28:57 Argon5 ywc-watchdog[50112]:       [CONFIG] 5 API Power calibration points applied.
@@ -74,7 +90,7 @@
     Nov 21 10:33:57 Argon5 ywc-watchdog[50112]:       [Config] 6 Temp calibration points applied.
     ```
 
-8.  Track Pwr on/off status [api endpoint: /api/cat/radioPower]
+8.  ### Track Pwr on/off status [api endpoint: /api/cat/radioPower]
 
     ```yaml
     Nov 21 08:23:31 Argon5 ywc-watchdog[49714]:       [CONFIG] Radio Power Status: On
@@ -83,7 +99,7 @@
     Nov 21 10:15:56 Argon5 ywc-watchdog[50059]: info: RadioWatchdogWorker[0]
     ```
 
-9.  Track transmit mode status [api endpoint: /api/cat/status/Activevfo.mode]
+9.  ### Track transmit mode status [api endpoint: /api/cat/status/Activevfo.mode]
     ```yaml
     Nov 21 19:25:39 Argon5 ywc-watchdog[51051]:       [CONFIG] Radio Power Status: On
     Nov 21 19:25:53 Argon5 ywc-watchdog[51051]: info: RadioWatchdogWorker[0]
@@ -100,7 +116,7 @@
     Nov 21 19:26:37 Argon5 ywc-watchdog[51051]:       Transmit ended. Resetting timer.
     Nov 21 19:27:07 Argon5 ywc-watchdog[51051]: info: RadioWatchdogWorker[0]
     ```
-10. Inhibit on invalid antenna [api endpoint: /api/cat/status/Activevfo.Antenna {"AllowedAntennas": [1]}]
+10. ### Inhibit on invalid antenna [api endpoint: /api/cat/status/Activevfo.Antenna {"AllowedAntennas": [1]}]
 
     ```yaml
     Nov 21 08:21:19 Argon5 ywc-watchdog[49644]:       Invalid Antenna detected (2) during transmission. Executing emergency cutoff!
@@ -109,7 +125,7 @@
     Nov 21 08:21:31 Argon5 ywc-watchdog[49644]: info: RadioWatchdogWorker[0]
     ```
 
-11. Inhibit on high swr [api endpoint: /api/calibration/all {MaxSwr: 2.5}]
+11. ### Inhibit on high swr [api endpoint: /api/calibration/all {MaxSwr: 2.5}]
 
     ```yaml
     Nov 21 19:27:22 Argon5 ywc-watchdog[51051]:       Transmit started. Mode: LSB, Power: 5.00, SWR: 1.1, Temp: 38.3
@@ -125,7 +141,7 @@
     Nov 21 19:27:23 Argon5 ywc-watchdog[51051]:       Transmit ended. Resetting timer.
     ```
 
-12. Inhibit on high Temp [api enpoint: /api/calibration/all {MaxTmp: 30}]
+12. ### Inhibit on high Temp [api enpoint: /api/calibration/all {MaxTmp: 30}]
 
     ```yaml
     Nov 21 08:21:31 Argon5 ywc-watchdog[49644]:       Transmit started. Mode: LSB, Power: 5.00, SWR: 1.1, Temp: 39.6
@@ -140,7 +156,7 @@
     Nov 21 08:21:31 Argon5 ywc-watchdog[49644]: info: RadioWatchdogWorker[0]
     ```
 
-13. Inhibit on MaxDurationTx threshold {"MaxTxDurationMinutes": 0.05}
+13. ### Inhibit on MaxDurationTx threshold {"MaxTxDurationMinutes": 0.05}
 
     ```yaml
     Nov 21 19:32:24 Argon5 ywc-watchdog[51121]:       [CONFIG] Radio Power Status: On
@@ -154,7 +170,8 @@
     Nov 21 19:32:40 Argon5 ywc-watchdog[51121]:       Transmit ended. Resetting timer.
     ```
 
-14. Failover to Shelly on api endpoint loss of communication [docker compose down ywc]
+14. ### Failover to Shelly on api endpoint loss of communication [docker compose down ywc]
+
     ```yaml
     Nov 21 19:36:12 Argon5 ywc-watchdog[51194]:       [CONFIG] Radio Power Status: On
     Nov 21 19:36:28 Argon5 ywc-watchdog[51194]: info: RadioWatchdogWorker[0]
@@ -185,7 +202,8 @@
     Nov 21 19:36:33 Argon5 ywc-watchdog[51194]: crit: RadioWatchdogWorker[0]
     Nov 21 19:36:33 Argon5 ywc-watchdog[51194]:       VERIFIED: Shelly channel 1 is confirmed OFF.
     ```
-15. Confirm YWC API endpoint on restore communications:
+
+15. ### Confirm YWC API endpoint on restore communications:
     ```yaml
     Nov 21 19:39:19 Argon5 ywc-watchdog[51194]:       Radio API connection restored. Resetting watchdog state.
     Nov 21 19:39:19 Argon5 ywc-watchdog[51194]: info: RadioWatchdogWorker[0]
