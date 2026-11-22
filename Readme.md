@@ -146,9 +146,9 @@ Before starting the service, update `appsettings.json` with your Yaesu Web Contr
 
 For a complete breakdown of all settings and environment overrides, see **[CONFIGURATION.md](./CONFIGURATION.md)**.
 
-## Example Output
+## Log Reference
 
-For `ywc-watchdog` examples, see **[LOG_REFERENCE.md](./LOG_REFERENCE.md)**.
+For `ywc-watchdog` log references, see **[LOG_REFERENCE.md](./LOG_REFERENCE.md)**.
 
 ## ⚠️ Disclaimer
 
