@@ -47,7 +47,12 @@ public class RadioWatchdogWorker : BackgroundService
     private readonly ILogger<RadioWatchdogWorker> _logger;
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly WatchdogSettings _settings;
+    private static readonly JsonSerializerOptions _jsonOptions = new()
+    {
+        PropertyNameCaseInsensitive = true
+    };
     private int _swrViolationCount = 0;
+    private int _tmpViolationCount = 0;
     private DateTime? _txStartTime = null;
     private DateTime _calibrationTimer = DateTime.MinValue;
     public bool IsRadioPowerOn { get; private set; }
@@ -73,12 +78,14 @@ public class RadioWatchdogWorker : BackgroundService
         _logger.LogInformation("Starting YWC REST Watchdog Service polling status endpoint...");
         _logger.LogInformation("[CONFIG] Polling API: {Url}", _settings.YwcApiUrl);
         _logger.LogInformation("[CONFIG] Shelly IP: {Ip} (Channel: {Channel})", _settings.ShellyIp, _settings.ShellyChannel);
-        _logger.LogInformation("[CONFIG] Max TX Duration: {Duration} minutes", _settings.MaxTxDurationMinutes);
         _logger.LogInformation("[CONFIG] Permitted Antennas: [{Antennas}]", string.Join(", ", _settings.AllowedAntennas));
-        _logger.LogInformation("[CONFIG] Max Allowed SWR Meter: {Swr}", _settings.MaxSwr);
+        _logger.LogInformation("[CONFIG] Max Allowed SWR: {Swr}", _settings.MaxSwr);
+        _logger.LogInformation("[CONFIG] Max Allowed Temp: {Tmp} Celsius", _settings.MaxTmp);
+        _logger.LogInformation("[CONFIG] Max TX Duration: {Duration} minutes", _settings.MaxTxDurationMinutes);
         _logger.LogInformation("[CONFIG] Meter Calibration Timer: {CalibrateTimerSec} seconds", _settings.CalibrateTimerSec);
         _logger.LogInformation("[CONFIG] SWR Meter Calibration Values: {Swr}", string.Join(", ", _settings.SwrCalibration.Select(p => $"Raw {p.Raw} -> SWR {p.Swr}")));
         _logger.LogInformation("[CONFIG] PWR Meter Calibration Values: {Pwr}", string.Join(", ", _settings.PwrCalibration.Select(p => $"Raw {p.Raw} -> PWR {p.Pwr}")));
+        _logger.LogInformation("[CONFIG] Temp Meter Calibration Values: {Tmp}", string.Join(", ", _settings.TempCalibration.Select(p => $"Raw {p.Raw} ->  TMP {p.Tpa}")));
         _logger.LogInformation("[CONFIG] Initialization Complete");
 
         await UpdateCalibrationAsync(stoppingToken);
@@ -109,11 +116,12 @@ public class RadioWatchdogWorker : BackgroundService
             try
             {
                 var client = _httpClientFactory.CreateClient("RadioClient");
-                var response = await client.GetAsync(string.Empty, stoppingToken);
+                var response = await client.GetAsync("api/cat/status", stoppingToken);
+                response.EnsureSuccessStatusCode();
 
                 if (response.IsSuccessStatusCode)
                 {
-                    var radioStatus = await response.Content.ReadFromJsonAsync<RadioStatus>(cancellationToken: stoppingToken);
+                    var radioStatus = await response.Content.ReadFromJsonAsync<RadioStatus>(_jsonOptions, stoppingToken);
                     if (radioStatus != null)
 
                     {
@@ -160,10 +168,9 @@ public class RadioWatchdogWorker : BackgroundService
         {
             var client = _httpClientFactory.CreateClient("RadioClient");
             var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-            var ywcBaseUrl = new Uri(_settings.YwcApiUrl).GetLeftPart(UriPartial.Authority);
-
+            // var ywcBaseUrl = new Uri(_settings.YwcApiUrl).GetLeftPart(UriPartial.Authority);
             var powerStatus = await client.GetFromJsonAsync<PowerStatusResponse>(
-                $"{ywcBaseUrl}/api/cat/radiopower", options, stoppingToken);
+                $"api/cat/radiopower", options, stoppingToken);
 
             if (powerStatus != null)
             {
@@ -193,14 +200,16 @@ public class RadioWatchdogWorker : BackgroundService
                 ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true
             };
 
-            using var client = new HttpClient(handler);
+            var client = _httpClientFactory.CreateClient("RadioClient");
 
-            var uri = new Uri(_settings.YwcApiUrl);
-            string ywcBaseUrl = $"{uri.Scheme}://{uri.Authority}";
+            //using var client = new HttpClient(handler);
+
+            // var uri = new Uri(_settings.YwcApiUrl);
+            //   string ywcBaseUrl = $"{uri.Scheme}://{uri.Authority}";
 
             var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
 
-            var response = await client.GetFromJsonAsync<CalibrationApiResponse>($"{ywcBaseUrl}/api/calibration/all", new JsonSerializerOptions { PropertyNameCaseInsensitive = true }, stoppingToken);
+            var response = await client.GetFromJsonAsync<CalibrationApiResponse>($"/api/calibration/all", new JsonSerializerOptions { PropertyNameCaseInsensitive = true }, stoppingToken);
 
             if (response != null)
             {
@@ -218,11 +227,10 @@ public class RadioWatchdogWorker : BackgroundService
                     if (newPwrPoints.Count > 0)
                     {
                         _settings.PwrCalibration = newPwrPoints;
-                        _logger.LogInformation("Successfully applied {Count} PWR calibration points from API.", newPwrPoints.Count);
+                        _logger.LogInformation("[CONFIG] {Count} API Power calibration points applied. ", newPwrPoints.Count);
                     }
                 }
             }
-
 
             if (response?.SWR != null && response.SWR.Count > 0)
             {
@@ -237,7 +245,24 @@ public class RadioWatchdogWorker : BackgroundService
                 if (newSwrPoints.Count > 0)
                 {
                     _settings.SwrCalibration = newSwrPoints;
-                    _logger.LogInformation("Successfully applied {Count} SWR calibration points from API.", newSwrPoints.Count);
+                    _logger.LogInformation("[Config] {Count} API SWR calibration points applied.", newSwrPoints.Count);
+                }
+            }
+
+            if (response?.TPA != null && response.TPA.Count > 0)
+            {
+                var newTmpPoints = new List<WatchdogSettings.TempCalibrationPoint>(); // Or whatever your SWR point type is named
+                foreach (var entry in response.TPA)
+                {
+                    if (double.TryParse(entry.Radio, out double tmpVal))
+                    {
+                        newTmpPoints.Add(new WatchdogSettings.TempCalibrationPoint((int)entry.Raw, tmpVal));
+                    }
+                }
+                if (newTmpPoints.Count > 0)
+                {
+                    _settings.TempCalibration = newTmpPoints;
+                    _logger.LogInformation("[Config] {Count} Temp calibration points applied.", newTmpPoints.Count);
                 }
             }
         }
@@ -249,13 +274,14 @@ public class RadioWatchdogWorker : BackgroundService
     private async Task<bool> EvaluateRadioStateAsync(RadioStatus status, long pollCount)
     {
         var client = _httpClientFactory.CreateClient("RadioClient");
-        var txUrl = _settings.YwcApiUrl.Replace("/status", "/tx");
 
-        var responseString = await client.GetStringAsync(txUrl);
-        var txStatus = JsonSerializer.Deserialize<TxStatus>(responseString);
-        var modeStatus = JsonSerializer.Deserialize<VfoStatus>(responseString);
+        var responseString = await client.GetStringAsync("api/cat/tx");
+        var txStatus = JsonSerializer.Deserialize<TxStatus>(responseString, _jsonOptions);
+        var modeStatus = JsonSerializer.Deserialize<VfoStatus>(responseString, _jsonOptions);
+        var tmpStatus = JsonSerializer.Deserialize<TmpStatus>(responseString, _jsonOptions);
 
         bool isTransmitting = txStatus?.Transmitting ?? false;
+
 
         if (isTransmitting)
         {
@@ -273,12 +299,13 @@ public class RadioWatchdogWorker : BackgroundService
             }
             double calibratedPwr = GetCalibratedPwr(status.PowerMeter);
             double calibratedSwr = GetCalibratedSwr(status.SwrMeter);
+            double calibratedTmp = GetCalibratedTmp(status.TmpMeter);
 
             if (_txStartTime == null)
 
             {
                 _txStartTime = DateTime.UtcNow;
-                _logger.LogInformation("Transmit started. Mode: {ModeStatus}, Power: {CalibratedPwr:F2}, SWR: {CalibratedSwr:F1}", currentMode, calibratedPwr, calibratedSwr);
+                _logger.LogInformation("Transmit started. Mode: {ModeStatus}, Power: {CalibratedPwr:F2}, SWR: {CalibratedSwr:F1}, Temp: {CalibratedTmp:F1}", currentMode, calibratedPwr, calibratedSwr, calibratedTmp);
             }
 
             var txDuration = (DateTime.UtcNow - _txStartTime.Value).TotalMinutes;
@@ -296,6 +323,18 @@ public class RadioWatchdogWorker : BackgroundService
                 if (_swrViolationCount >= 2)
                 {
                     _logger.LogCritical("SWR threshold breached sustained limit ({CalibratedSwr:F2}). Executing emergency cutoff!", calibratedSwr);
+                    await TriggerEmergencyCutoffAsync();
+                }
+            }
+
+            if (calibratedTmp > _settings.MaxTmp)
+            {
+                _tmpViolationCount++;
+                _logger.LogWarning("High Temp detected: {CalibratedTmp:F2}, Violation count: {Count})", calibratedTmp, _tmpViolationCount);
+
+                if (_tmpViolationCount >= 2)
+                {
+                    _logger.LogCritical("Temp threshold breached sustained limit ({CalibratedTmp:F2}). Executing emergency cutoff!", calibratedTmp);
                     await TriggerEmergencyCutoffAsync();
                 }
             }
@@ -363,15 +402,39 @@ public class RadioWatchdogWorker : BackgroundService
         return rawValue;
     }
 
+    private double GetCalibratedTmp(double rawValue)
+    {
+        var points = _settings.TempCalibration;
+
+        if (points == null || points.Count == 0)
+            return rawValue;
+
+        if (rawValue <= points[0].Raw) return points[0].Tpa;
+        if (rawValue >= points[^1].Raw) return points[^1].Tpa;
+
+        for (int i = 0; i < points.Count - 1; i++)
+        {
+            var p1 = points[i];
+            var p2 = points[i + 1];
+
+            if (rawValue >= p1.Raw && rawValue <= p2.Raw)
+            {
+                double ratio = (double)(rawValue - p1.Raw) / (p2.Raw - p1.Raw);
+                return p1.Tpa + ratio * (p2.Tpa - p1.Tpa);
+            }
+        }
+
+        return rawValue;
+    }
     private async Task TriggerEmergencyCutoffAsync()
     {
         try
         {
             var pttOffPayload = new { transmitting = false };
-            var cutoffUrl = _settings.YwcApiUrl.Replace("/status", "/tx");
 
             var client = _httpClientFactory.CreateClient("RadioClient");
-            var response = await client.PostAsJsonAsync(cutoffUrl, pttOffPayload);
+            var response = await client.PostAsJsonAsync("api/cat/tx", pttOffPayload);
+
             if (response.IsSuccessStatusCode)
             {
                 _logger.LogInformation("Successfully sent PTT cutoff command to radio.");
@@ -388,6 +451,7 @@ public class RadioWatchdogWorker : BackgroundService
             await TriggerShellyShutdownAsync();
         }
     }
+
 
     private async Task<bool?> CheckShellyRelayStatusAsync()
     {
@@ -498,6 +562,12 @@ public class TxStatus
     [JsonPropertyName("transmitting")]
     public bool Transmitting { get; set; }
 }
+
+public class TmpStatus
+{
+    [JsonPropertyName("temperature")]
+    public int Temperature { get; set; }
+}
 public class RadioStatus
 {
     [JsonPropertyName("isConnected")]
@@ -508,6 +578,9 @@ public class RadioStatus
 
     [JsonPropertyName("swrMeter")]
     public double SwrMeter { get; set; }
+
+    [JsonPropertyName("temperature")]
+    public double TmpMeter { get; set; }
 
     [JsonPropertyName("activeVfo")]
     public int ActiveVfo { get; set; }
@@ -539,6 +612,7 @@ public class WatchdogSettings
     public double MaxTxDurationMinutes { get; set; } = 0.17;
     public List<int> AllowedAntennas { get; set; } = new();
     public double MaxSwr { get; set; } = 2.5;
+    public double MaxTmp { get; set; } = 30;
     public int CalibrateTimerSec { get; set; } = 300;
 
     public List<SwrCalibrationPoint> SwrCalibration { get; set; } = new()
@@ -564,11 +638,25 @@ public class WatchdogSettings
     };
 
     public record PowerCalibrationPoint(int Raw, double Pwr);
+
+    public List<TempCalibrationPoint> TempCalibration { get; set; } = new()
+    {
+        new(14, 0),
+        new(60, 20),
+        new(106, 40),
+        new(152, 60),
+        new(198, 80),
+        new(244, 100)
+    };
+
+    public record TempCalibrationPoint(int Raw, double Tpa);
+
 }
 public class CalibrationApiResponse
 {
     public List<CalibrationEntry> PWR { get; set; } = new();
     public List<CalibrationEntry> SWR { get; set; } = new();
+    public List<CalibrationEntry> TPA { get; set; } = new();
 
     //     [JsonPropertyName("Compression")]
     //     public List<CalibrationEntry> Compression { get; set; } = new();
@@ -595,4 +683,31 @@ public class CalibrationEntry
 
     [JsonPropertyName("raw")]
     public double Raw { get; set; }
+}
+
+public class WatchdogState
+{
+    // Overall Card Header & State (Matches your Antenna Guardian card layout)
+    public string Status { get; set; } = "OFFLINE";           // "ONLINE", "OFFLINE", "TRIPPED"
+    public string StatusDetail { get; set; } = "Waiting to start"; // e.g., "Monitoring", "High SWR Tripped", "Max TX Time Tripped"
+    public string Version { get; set; } = "1.3.0";
+
+    // Live Telemetry (Updated on each poll)
+    public double CurrentSwr { get; set; }
+    public double CurrentPowerWatts { get; set; }
+    public double CurrentTempCelsius { get; set; }
+    public string ActiveAntenna { get; set; } = "--";
+    public bool IsTransmitting { get; set; }
+    public double TxDurationMinutes { get; set; }
+    public bool IsRadioPowerOn { get; set; }
+
+    // Active Thresholds (So the WPF card can show limits or color-code warnings)
+    public double MaxAllowedSwr { get; set; }
+    public double MaxAllowedTempCelsius { get; set; }
+    public double MaxTxDurationMinutes { get; set; }
+    public List<string> AllowedAntennas { get; set; } = new();
+
+    // Watchdog Health & Timestamp
+    public bool IsTripped { get; set; }
+    public DateTime LastUpdatedUtc { get; set; } = DateTime.UtcNow;
 }
