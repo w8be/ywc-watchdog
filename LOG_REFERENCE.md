@@ -85,16 +85,20 @@
 
 9.  Track transmit mode status [api endpoint: /api/cat/status/Activevfo.mode]
     ```
-    Nov 15 13:48:13 127.0.0.1 ywc-watchdog[33962]:       Transmit started. Mode: LSB, Power: 5.00, SWR: 1.0
-    Nov 15 13:48:16 127.0.0.1 ywc-watchdog[33962]: info: RadioWatchdogWorker[0]
-    Nov 15 13:48:16 127.0.0.1 ywc-watchdog[33962]:       Transmit ended. Resetting timer.
-    Nov 15 13:48:27 127.0.0.1 ywc-watchdog[33962]: info: RadioWatchdogWorker[0]
-    Nov 15 14:30:30 127.0.0.1 ywc-watchdog[34147]:       Transmit started. Mode: CW-U, Power: 5.00, SWR: 1.0
-    Nov 15 14:30:31 127.0.0.1 ywc-watchdog[34147]: info: RadioWatchdogWorker[0]
-    Nov 15 14:38:27 127.0.0.1 ywc-watchdog[34147]:       Transmit started. Mode: AM, Power: 6.74, SWR: 1.0
-    Nov 15 14:38:30 127.0.0.1 ywc-watchdog[34147]: info: RadioWatchdogWorker[0]
-    Nov 15 14:38:30 127.0.0.1 ywc-watchdog[34147]:       Transmit ended. Resetting timer.
-    Nov 15 14:38:32 127.0.0.1 ywc-watchdog[34147]: info: RadioWatchdogWorker[0]
+    Nov 21 19:25:39 Argon5 ywc-watchdog[51051]:       [CONFIG] Radio Power Status: On
+    Nov 21 19:25:53 Argon5 ywc-watchdog[51051]: info: RadioWatchdogWorker[0]
+    Nov 21 19:25:53 Argon5 ywc-watchdog[51051]:       Transmit started. Mode: LSB, Power: 5.00, SWR: 1.1, Temp: 36.5
+    Nov 21 19:25:58 Argon5 ywc-watchdog[51051]: info: RadioWatchdogWorker[0]
+    Nov 21 19:25:58 Argon5 ywc-watchdog[51051]:       Transmit ended. Resetting timer.
+    Nov 21 19:26:18 Argon5 ywc-watchdog[51051]: info: RadioWatchdogWorker[0]
+    Nov 21 19:26:18 Argon5 ywc-watchdog[51051]:       Transmit started. Mode: CW-U, Power: 5.00, SWR: 1.1, Temp: 36.5
+    Nov 21 19:26:21 Argon5 ywc-watchdog[51051]: info: RadioWatchdogWorker[0]
+    Nov 21 19:26:21 Argon5 ywc-watchdog[51051]:       Transmit ended. Resetting timer.
+    Nov 21 19:26:34 Argon5 ywc-watchdog[51051]: info: RadioWatchdogWorker[0]
+    Nov 21 19:26:34 Argon5 ywc-watchdog[51051]:       Transmit started. Mode: AM, Power: 5.00, SWR: 1.1, Temp: 38.3
+    Nov 21 19:26:37 Argon5 ywc-watchdog[51051]: info: RadioWatchdogWorker[0]
+    Nov 21 19:26:37 Argon5 ywc-watchdog[51051]:       Transmit ended. Resetting timer.
+    Nov 21 19:27:07 Argon5 ywc-watchdog[51051]: info: RadioWatchdogWorker[0]
     ```
 10. Inhibit on invalid antenna [api endpoint: /api/cat/status/Activevfo.Antenna {"AllowedAntennas": [1]}]
 
@@ -108,16 +112,17 @@
 11. Inhibit on high swr [api endpoint: /api/calibration/all {MaxSwr: 2.5}]
 
     ```
-    Nov 15 14:31:05 127.0.0.1 ywc-watchdog[34147]:       Transmit started. Mode: CW-U, Power: 7.17, SWR: 1.0
-    Nov 15 14:31:06 127.0.0.1 ywc-watchdog[34147]: warn: RadioWatchdogWorker[0]
-    Nov 15 14:31:06 127.0.0.1 ywc-watchdog[34147]:       High SWR detected: 9.90 (Raw: 255, Violation count: 1)
-    Nov 15 14:31:06 127.0.0.1 ywc-watchdog[34147]: warn: RadioWatchdogWorker[0]
-    Nov 15 14:31:06 127.0.0.1 ywc-watchdog[34147]:       High SWR detected: 9.90 (Raw: 255, Violation count: 2)
-    Nov 15 14:31:06 127.0.0.1 ywc-watchdog[34147]: crit: RadioWatchdogWorker[0]
-    Nov 15 14:31:06 127.0.0.1 ywc-watchdog[34147]:       SWR threshold breached sustained limit (9.90). Executing emergency cutoff!
-    Nov 15 14:31:06 127.0.0.1 ywc-watchdog[34147]: info: RadioWatchdogWorker[0]
-    Nov 15 14:31:06 127.0.0.1 ywc-watchdog[34147]:       Successfully sent PTT cutoff command to radio.
-    Nov 15 14:31:06 127.0.0.1 ywc-watchdog[34147]: info: RadioWatchdogWorker[0]
+    Nov 21 19:27:22 Argon5 ywc-watchdog[51051]:       Transmit started. Mode: LSB, Power: 5.00, SWR: 1.1, Temp: 38.3
+    Nov 21 19:27:23 Argon5 ywc-watchdog[51051]: warn: RadioWatchdogWorker[0]
+    Nov 21 19:27:23 Argon5 ywc-watchdog[51051]:       High SWR detected: 2.24, Violation count: 1
+    Nov 21 19:27:23 Argon5 ywc-watchdog[51051]: warn: RadioWatchdogWorker[0]
+    Nov 21 19:27:23 Argon5 ywc-watchdog[51051]:       High SWR detected: 9.90, Violation count: 2
+    Nov 21 19:27:23 Argon5 ywc-watchdog[51051]: crit: RadioWatchdogWorker[0]
+    Nov 21 19:27:23 Argon5 ywc-watchdog[51051]:       SWR threshold breached sustained limit (9.90). Executing emergency cutoff!
+    Nov 21 19:27:23 Argon5 ywc-watchdog[51051]: info: RadioWatchdogWorker[0]
+    Nov 21 19:27:23 Argon5 ywc-watchdog[51051]:       Successfully sent PTT cutoff command to radio.
+    Nov 21 19:27:23 Argon5 ywc-watchdog[51051]: info: RadioWatchdogWorker[0]
+    Nov 21 19:27:23 Argon5 ywc-watchdog[51051]:       Transmit ended. Resetting timer.
     ```
 
 12. Inhibit on high Temp [api enpoint: /api/calibration/all {MaxTmp: 30}]
@@ -138,40 +143,53 @@
 13. Inhibit on MaxDurationTx threshold {"MaxTxDurationMinutes": 0.05}
 
     ```
-    Nov 15 15:03:35 127.0.0.1 ywc-watchdog[34147]:       Transmit started. Mode: LSB, Power: 5.00, SWR: 1.0
-    Nov 15 15:03:38 127.0.0.1 ywc-watchdog[34147]: crit: RadioWatchdogWorker[0]
-    Nov 15 15:03:38 127.0.0.1 ywc-watchdog[34147]:       Max TX duration exceeded (0.05 mins). Triggering emergency PTT cutoff!
-    Nov 15 15:03:38 127.0.0.1 ywc-watchdog[34147]: info: RadioWatchdogWorker[0]
-    Nov 15 15:03:38 127.0.0.1 ywc-watchdog[34147]:       Successfully sent PTT cutoff command to radio.
-    Nov 15 15:03:39 127.0.0.1 ywc-watchdog[34147]: info: RadioWatchdogWorker[0]
+    Nov 21 19:32:24 Argon5 ywc-watchdog[51121]:       [CONFIG] Radio Power Status: On
+    Nov 21 19:32:37 Argon5 ywc-watchdog[51121]: info: RadioWatchdogWorker[0]
+    Nov 21 19:32:37 Argon5 ywc-watchdog[51121]:       Transmit started. Mode: LSB, Power: 5.00, SWR: 1.1, Temp: 38.3
+    Nov 21 19:32:40 Argon5 ywc-watchdog[51121]: crit: RadioWatchdogWorker[0]
+    Nov 21 19:32:40 Argon5 ywc-watchdog[51121]:       Max TX duration exceeded (0.05 mins). Triggering emergency PTT cutoff!
+    Nov 21 19:32:40 Argon5 ywc-watchdog[51121]: info: RadioWatchdogWorker[0]
+    Nov 21 19:32:40 Argon5 ywc-watchdog[51121]:       Successfully sent PTT cutoff command to radio.
+    Nov 21 19:32:40 Argon5 ywc-watchdog[51121]: info: RadioWatchdogWorker[0]
+    Nov 21 19:32:40 Argon5 ywc-watchdog[51121]:       Transmit ended. Resetting timer.
     ```
 
 14. Failover to Shelly on api endpoint loss of communication [docker compose down ywc]
     ```
-    Nov 15 15:07:48 127.0.0.1 ywc-watchdog[34354]:       Transmit started. Mode: LSB, Power: 5.00, SWR: 1.0
-    Nov 15 15:07:51 127.0.0.1 ywc-watchdog[34354]: fail: RadioWatchdogWorker[0]
-    Nov 15 15:07:51 127.0.0.1 ywc-watchdog[34354]:       Error occurred while polling radio status API. Triggering emergency Shelly shutdown due to lost communication!
-    Nov 15 15:07:51 127.0.0.1 ywc-watchdog[34354]:       System.Net.Http.HttpRequestException: Connection refused (127.0.0.1:8443)
-    Nov 15 15:07:51 127.0.0.1 ywc-watchdog[34354]:        ---> System.Net.Sockets.SocketException (111): Connection refused
-    Nov 15 15:07:51 127.0.0.1 ywc-watchdog[34354]:          at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.ThrowException(SocketError error, CancellationToken cancellationToken)
-    Nov 15 15:07:51 127.0.0.1 ywc-watchdog[34354]:          at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.System.Threading.Tasks.Sources.IValueTaskSource.GetResult(Int16 token)
-    Nov 15 15:07:51 127.0.0.1 ywc-watchdog[34354]:          at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
-    Nov 15 15:07:51 127.0.0.1 ywc-watchdog[34354]:          --- End of inner exception stack trace ---
-    Nov 15 15:07:51 127.0.0.1 ywc-watchdog[34354]:          at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
-    Nov 15 15:07:51 127.0.0.1 ywc-watchdog[34354]:          at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
-    Nov 15 15:07:51 127.0.0.1 ywc-watchdog[34354]:          at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
-    Nov 15 15:07:51 127.0.0.1 ywc-watchdog[34354]:          at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
-    Nov 15 15:07:51 127.0.0.1 ywc-watchdog[34354]:          at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
-    Nov 15 15:07:51 127.0.0.1 ywc-watchdog[34354]:          at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
-    Nov 15 15:07:51 127.0.0.1 ywc-watchdog[34354]:          at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
-    Nov 15 15:07:51 127.0.0.1 ywc-watchdog[34354]:          at Microsoft.Extensions.Http.Logging.LoggingHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
-    Nov 15 15:07:51 127.0.0.1 ywc-watchdog[34354]:          at Microsoft.Extensions.Http.Logging.LoggingScopeHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
-    Nov 15 15:07:51 127.0.0.1 ywc-watchdog[34354]:          at System.Net.Http.HttpClient.<SendAsync>g__Core|83_0(HttpRequestMessage request, HttpCompletionOption completionOption, CancellationTokenSource cts, Boolean disposeCts, CancellationTokenSource pendingRequestsCts, CancellationToken originalCancellationToken)
-    Nov 15 15:07:51 127.0.0.1 ywc-watchdog[34354]:          at RadioWatchdogWorker.ExecuteAsync(CancellationToken stoppingToken)
-    Nov 15 15:07:51 127.0.0.1 ywc-watchdog[34354]: crit: RadioWatchdogWorker[0]
-    Nov 15 15:07:51 127.0.0.1 ywc-watchdog[34354]:       Connecting to Shelly WebSocket at ws://192.168.1.136/rpc...
-    Nov 15 15:07:51 127.0.0.1 ywc-watchdog[34354]: crit: RadioWatchdogWorker[0]
-    Nov 15 15:07:51 127.0.0.1 ywc-watchdog[34354]:       EMERGENCY: Sent WebSocket shutdown command to Shelly channel 1.
-    Nov 15 15:07:51 127.0.0.1 ywc-watchdog[34354]: crit: RadioWatchdogWorker[0]
-    Nov 15 15:07:51 127.0.0.1 ywc-watchdog[34354]:       VERIFIED: Shelly channel 1 is confirmed OFF.
+    Nov 21 19:36:12 Argon5 ywc-watchdog[51194]:       [CONFIG] Radio Power Status: On
+    Nov 21 19:36:28 Argon5 ywc-watchdog[51194]: info: RadioWatchdogWorker[0]
+    Nov 21 19:36:28 Argon5 ywc-watchdog[51194]:       Transmit started. Mode: LSB, Power: 5.00, SWR: 1.1, Temp: 39.6
+    Nov 21 19:36:32 Argon5 ywc-watchdog[51194]: fail: RadioWatchdogWorker[0]
+    Nov 21 19:36:32 Argon5 ywc-watchdog[51194]:       Error occurred while polling radio status API. Triggering emergency Shelly shutdown due to lost communication!
+    Nov 21 19:36:32 Argon5 ywc-watchdog[51194]:       System.Net.Http.HttpRequestException: Connection refused (192.168.1.196:8443)
+    Nov 21 19:36:32 Argon5 ywc-watchdog[51194]:        ---> System.Net.Sockets.SocketException (111): Connection refused
+    Nov 21 19:36:32 Argon5 ywc-watchdog[51194]:          at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.ThrowException(SocketError error, CancellationToken cancellationToken)
+    Nov 21 19:36:32 Argon5 ywc-watchdog[51194]:          at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.System.Threading.Tasks.Sources.IValueTaskSource.GetResult(Int16 token)
+    Nov 21 19:36:32 Argon5 ywc-watchdog[51194]:          at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+    Nov 21 19:36:32 Argon5 ywc-watchdog[51194]:          --- End of inner exception stack trace ---
+    Nov 21 19:36:32 Argon5 ywc-watchdog[51194]:          at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+    Nov 21 19:36:32 Argon5 ywc-watchdog[51194]:          at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+    Nov 21 19:36:32 Argon5 ywc-watchdog[51194]:          at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+    Nov 21 19:36:32 Argon5 ywc-watchdog[51194]:          at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+    Nov 21 19:36:32 Argon5 ywc-watchdog[51194]:          at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+    Nov 21 19:36:32 Argon5 ywc-watchdog[51194]:          at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+    Nov 21 19:36:32 Argon5 ywc-watchdog[51194]:          at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+    Nov 21 19:36:32 Argon5 ywc-watchdog[51194]:          at Microsoft.Extensions.Http.Logging.LoggingHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+    Nov 21 19:36:32 Argon5 ywc-watchdog[51194]:          at Microsoft.Extensions.Http.Logging.LoggingScopeHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+    Nov 21 19:36:32 Argon5 ywc-watchdog[51194]:          at System.Net.Http.HttpClient.<SendAsync>g__Core|83_0(HttpRequestMessage request, HttpCompletionOption completionOption, CancellationTokenSource cts, Boolean disposeCts, CancellationTokenSource pendingRequestsCts, CancellationToken originalCancellationToken)
+    Nov 21 19:36:32 Argon5 ywc-watchdog[51194]:          at RadioWatchdogWorker.ExecuteAsync(CancellationToken stoppingToken)
+    Nov 21 19:36:32 Argon5 ywc-watchdog[51194]: crit: RadioWatchdogWorker[0]
+    Nov 21 19:36:32 Argon5 ywc-watchdog[51194]:       Connecting to Shelly WebSocket at ws://192.168.1.136/rpc...
+    Nov 21 19:36:32 Argon5 ywc-watchdog[51194]: crit: RadioWatchdogWorker[0]
+    Nov 21 19:36:32 Argon5 ywc-watchdog[51194]:       EMERGENCY: Sent WebSocket shutdown command to Shelly channel 1.
+    Nov 21 19:36:33 Argon5 ywc-watchdog[51194]: crit: RadioWatchdogWorker[0]
+    Nov 21 19:36:33 Argon5 ywc-watchdog[51194]:       VERIFIED: Shelly channel 1 is confirmed OFF.
+    ```
+15. Confirm YWC API endpoint on restore communications:
+    ```
+    Nov 21 19:39:19 Argon5 ywc-watchdog[51194]:       Radio API connection restored. Resetting watchdog state.
+    Nov 21 19:39:19 Argon5 ywc-watchdog[51194]: info: RadioWatchdogWorker[0]
+    Nov 21 19:39:19 Argon5 ywc-watchdog[51194]:       Transmit ended. Resetting timer.
+    Nov 21 19:39:20 Argon5 ywc-watchdog[51194]: info: RadioWatchdogWorker[0]
+    Nov 21 19:39:20 Argon5 ywc-watchdog[51194]:       [CONFIG] Radio Power Status: Off
     ```
