@@ -2,7 +2,7 @@
 
 ## Log Output Reference
 
-[1. Startup](#startup)
+[1. Startup](#startup)\
 [2. Connect to ywc](#connect-to-ywc-ywcapiurl-https1270018443)\
  [3. Connect to Shelly](#connect-to-shelly-shellyip-127001-shellychannel-1)\
  [4. Read ywc-watchdog settings](#read-ywc-watchdog-settings-appsettingsjson)\
