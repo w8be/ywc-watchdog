@@ -16,6 +16,7 @@ For parameters with threshold values, when exceeded, `ywc-watchdog` will inhibit
 ## Features
 
 - **Transceiver Protection:** Continuously monitors TX duration, SWR / Temperature limits, and Antenna selection.
+- **API endpoint variable polling rates:** 200 ms for Transmit Inhibt thresholds, 1 second for Recieve updates, and user config rate for Calibration updates.
 - **Automated App Calibration**: SWR / Power / Temperature calibration settings polled on timer.
 - **Fail-Safe Relay Fallback:** Automatically cuts mains power via a Shelly smart relay if CAT transmit inhibit fails.
 - **Cross-Platform:** Runs natively as a background service on Raspberry Pi (`linux-arm64`) and Windows (`win-x64`).
