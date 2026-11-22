@@ -9,12 +9,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+## 1.3.0 - 2206-11-20
+
+- Added appsettings.json object `"CalibrateTimerSec": 300`
+- Added radio temperature status from api response.
+- Added radio temperature Calibrate(Tmp) to YWC api response.
+- Added radio temperature inhibit on threshold.
+
+### Added
+
+## 1.2.0 - 2206-11-15
+
 - Added /api/cat/radioPower and /api/cat/status/mode objects.
 - Added meter Calibrate(Timer/Swr) to YWC api response.
 - Added radio power status form api response.
 - Added status responses to the log
-
-## [1.2.0] -2206-11-15
 
 ### Added
 
