@@ -3,11 +3,13 @@
 `ywc-watchdog` is a lightweight .NET watchdog service designed for `linux-arm64` and `win-x64` to monitor [Yaesu Web Control](https://github.com/mm5agm/Yaesu_Web_Control). The service monitors:
 
 - Radio Antennas
+- Radio Mode
 - Radio Power
+- Radio Status [on,off]
 - Radio SWR
 - Radio Temperature
 
-If a threshold is exceeded, `ywc-watchdog` will inhibit transmit. If the inhibit command fails, `ywc-watchdog` will fall back to disconnecting mains power via a Shelly relay.
+For parameters with threshold values, when exceeded, `ywc-watchdog` will inhibit transmit. If the inhibit command fails, `ywc-watchdog` will fall back to disconnecting mains power via a Shelly relay.
 
 > [!WARNING] > **Use at your own risk.** `ywc-watchdog` is a secondary safeguard, not a guaranteed protection system. Network delays, hardware faults, or misconfiguration can prevent timely transmit inhibit or relay cutoff. You remain solely responsible for equipment safety and amateur radio control-operator compliance. See [LICENSE](LICENSE) for full terms.
 
