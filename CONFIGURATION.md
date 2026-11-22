@@ -56,6 +56,8 @@ Controls YWC api endpoint polling, Radio CAT polling, transmit inhibit on thresh
 | `AllowedAntennas`      | `int[]`  | **Yes**  | `[1]`                      | List of permitted antenna port numbers (e.g., `[1, 2]`).                                                                                                                                                                                                                                                                  |
 | `CalibrateTimerSec`    | `int`    | **Yes**  | `300`                      | Value in seconds of the refresh poll timer for meter calibration data.                                                                                                                                                                                                                                                    |
 
+`Note - ywc-watchdog thresholds are configured as standard unit levels.   Yaesu Web Control converts the entry value from the radio to a standard unit for the UI display.  In order for the threshold settings to be accurate you must calibrate the Yaesu Web Control Meters for Power, SWR, and Temperature to ensure your standard unit selection will correlate to the radio meter value output (0 - 255).`
+
 ### `Logging`
 
 Controls standard .NET console and event logging verbosity. Valid values are `Trace`, `Debug`, `Information`, `Warning`, `Error`, `Critical`, and `None`.
