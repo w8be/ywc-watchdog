@@ -7,6 +7,7 @@
 - Radio Power
 - Radio Status [on,off]
 - Radio SWR
+- Radio Transmit
 - Radio Temperature
 
 For parameters with threshold values, when exceeded, `ywc-watchdog` will inhibit transmit. If the inhibit command fails, `ywc-watchdog` will fall back to disconnecting mains power via a Shelly relay.
