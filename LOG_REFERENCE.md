@@ -4,14 +4,14 @@
 
 1.  Startup
 
-    ```
+    ```yaml
     Nov 21 10:15:55 127.0.0.1 ywc-watchdog[50059]:       Application starting up. ReleaseId: 1.3.0
     Nov 21 10:15:55 127.0.0.1 ywc-watchdog[50059]: info: RadioWatchdogWorker[0]
     ```
 
 2.  Connect to ywc {"YwcApiUrl": "https://127.0.0.1:8443"}
 
-    ```
+    ```yaml
     Nov 21 10:15:55 127.0.0.1 ywc-watchdog[50059]:       Starting YWC REST Watchdog Service polling status endpoint...
     Nov 21 10:15:55 127.0.0.1 ywc-watchdog[50059]: info: RadioWatchdogWorker[0]
     Nov 21 10:15:55 127.0.0.1 ywc-watchdog[50059]:       [CONFIG] Polling API: https://127.0.0.1:8443
@@ -20,14 +20,14 @@
 
 3.  Connect to Shelly {"ShellyIp": "127.0.0.1"}, {"ShellyChannel": 1}
 
-    ```
+    ```yaml
     Nov 21 10:15:55 127.0.0.1 ywc-watchdog[50059]:       [CONFIG] Shelly IP: 127.0.0.1 (Channel: 0)
     Nov 21 10:15:55 127.0.0.1 ywc-watchdog[50059]: info: RadioWatchdogWorker[0]
     ```
 
 4.  Read ywc-watchdog settings [appsettings.json]:
 
-    ```
+    ```yaml
     Nov 21 10:15:55 127.0.0.1 ywc-watchdog[50059]:       [CONFIG] Permitted Antennas: [1]
     Nov 21 10:15:55 127.0.0.1 ywc-watchdog[50059]: info: RadioWatchdogWorker[0]
     Nov 21 10:15:55 127.0.0.1 ywc-watchdog[50059]:       [CONFIG] Max Allowed SWR: 2.5
@@ -41,7 +41,7 @@
     ```
 
 5.  Read Pwr/Swr/Temp calibration [api endpoint: /cat/status]:
-    ```
+    ```yaml
     Nov 21 10:18:56 Argon5 ywc-watchdog[50112]:       [CONFIG] SWR Meter Calibration Values: Raw 0 -> SWR 1, Raw 51 -> SWR 1.5, Raw 77 -> SWR 2, Raw 128 -> SWR 3, Raw 173 -> SWR 5, Raw 242 -> SWR 9.9
     Nov 21 10:18:56 Argon5 ywc-watchdog[50112]: info: RadioWatchdogWorker[0]
     Nov 21 10:18:56 Argon5 ywc-watchdog[50112]:       [CONFIG] PWR Meter Calibration Values: Raw 30 -> PWR 5, Raw 76 -> PWR 25, Raw 112 -> PWR 50, Raw 157 -> PWR 100, Raw 190 -> PWR 150, Raw 222 -> PWR 200
@@ -50,7 +50,7 @@
     Nov 21 10:18:56 Argon5 ywc-watchdog[50112]: info: RadioWatchdogWorker[0]
     ```
 6.  Apply Pwr/Swr/Temp calibration:
-    ```
+    ```yaml
     Nov 21 10:18:56 Argon5 ywc-watchdog[50112]:       [CONFIG] 5 API Power calibration points applied.
     Nov 21 10:18:56 Argon5 ywc-watchdog[50112]: info: RadioWatchdogWorker[0]
     Nov 21 10:18:56 Argon5 ywc-watchdog[50112]:       [Config] 6 API SWR calibration points applied.
@@ -60,7 +60,7 @@
     ```
 7.  Mesure YWC - ywc-watchdog calibration cycle completion {"CalibrateTimerSec": 300}
 
-    ```
+    ```yaml
     Nov 21 10:28:57 Argon5 ywc-watchdog[50112]:       [CONFIG] 5 API Power calibration points applied.
     Nov 21 10:28:57 Argon5 ywc-watchdog[50112]: info: RadioWatchdogWorker[0]
     Nov 21 10:28:57 Argon5 ywc-watchdog[50112]:       [Config] 6 API SWR calibration points applied.
@@ -76,7 +76,7 @@
 
 8.  Track Pwr on/off status [api endpoint: /api/cat/radioPower]
 
-    ```
+    ```yaml
     Nov 21 08:23:31 Argon5 ywc-watchdog[49714]:       [CONFIG] Radio Power Status: On
     Nov 21 08:23:38 Argon5 ywc-watchdog[49714]: info: RadioWatchdogWorker[0]
     Nov 21 10:15:56 Argon5 ywc-watchdog[50059]:       [CONFIG] Radio Power Status: Off
@@ -84,7 +84,7 @@
     ```
 
 9.  Track transmit mode status [api endpoint: /api/cat/status/Activevfo.mode]
-    ```
+    ```yaml
     Nov 21 19:25:39 Argon5 ywc-watchdog[51051]:       [CONFIG] Radio Power Status: On
     Nov 21 19:25:53 Argon5 ywc-watchdog[51051]: info: RadioWatchdogWorker[0]
     Nov 21 19:25:53 Argon5 ywc-watchdog[51051]:       Transmit started. Mode: LSB, Power: 5.00, SWR: 1.1, Temp: 36.5
@@ -102,7 +102,7 @@
     ```
 10. Inhibit on invalid antenna [api endpoint: /api/cat/status/Activevfo.Antenna {"AllowedAntennas": [1]}]
 
-    ```
+    ```yaml
     Nov 21 08:21:19 Argon5 ywc-watchdog[49644]:       Invalid Antenna detected (2) during transmission. Executing emergency cutoff!
     Nov 21 08:21:20 Argon5 ywc-watchdog[49644]: info: RadioWatchdogWorker[0]
     Nov 21 08:21:20 Argon5 ywc-watchdog[49644]:       Successfully sent PTT cutoff command to radio.
@@ -111,7 +111,7 @@
 
 11. Inhibit on high swr [api endpoint: /api/calibration/all {MaxSwr: 2.5}]
 
-    ```
+    ```yaml
     Nov 21 19:27:22 Argon5 ywc-watchdog[51051]:       Transmit started. Mode: LSB, Power: 5.00, SWR: 1.1, Temp: 38.3
     Nov 21 19:27:23 Argon5 ywc-watchdog[51051]: warn: RadioWatchdogWorker[0]
     Nov 21 19:27:23 Argon5 ywc-watchdog[51051]:       High SWR detected: 2.24, Violation count: 1
@@ -127,7 +127,7 @@
 
 12. Inhibit on high Temp [api enpoint: /api/calibration/all {MaxTmp: 30}]
 
-    ```
+    ```yaml
     Nov 21 08:21:31 Argon5 ywc-watchdog[49644]:       Transmit started. Mode: LSB, Power: 5.00, SWR: 1.1, Temp: 39.6
     Nov 21 08:21:31 Argon5 ywc-watchdog[49644]: warn: RadioWatchdogWorker[0]
     Nov 21 08:21:31 Argon5 ywc-watchdog[49644]:       High Temp detected: 39.57, Violation count: 1)
@@ -142,7 +142,7 @@
 
 13. Inhibit on MaxDurationTx threshold {"MaxTxDurationMinutes": 0.05}
 
-    ```
+    ```yaml
     Nov 21 19:32:24 Argon5 ywc-watchdog[51121]:       [CONFIG] Radio Power Status: On
     Nov 21 19:32:37 Argon5 ywc-watchdog[51121]: info: RadioWatchdogWorker[0]
     Nov 21 19:32:37 Argon5 ywc-watchdog[51121]:       Transmit started. Mode: LSB, Power: 5.00, SWR: 1.1, Temp: 38.3
@@ -155,7 +155,7 @@
     ```
 
 14. Failover to Shelly on api endpoint loss of communication [docker compose down ywc]
-    ```
+    ```yaml
     Nov 21 19:36:12 Argon5 ywc-watchdog[51194]:       [CONFIG] Radio Power Status: On
     Nov 21 19:36:28 Argon5 ywc-watchdog[51194]: info: RadioWatchdogWorker[0]
     Nov 21 19:36:28 Argon5 ywc-watchdog[51194]:       Transmit started. Mode: LSB, Power: 5.00, SWR: 1.1, Temp: 39.6
@@ -186,7 +186,7 @@
     Nov 21 19:36:33 Argon5 ywc-watchdog[51194]:       VERIFIED: Shelly channel 1 is confirmed OFF.
     ```
 15. Confirm YWC API endpoint on restore communications:
-    ```
+    ```yaml
     Nov 21 19:39:19 Argon5 ywc-watchdog[51194]:       Radio API connection restored. Resetting watchdog state.
     Nov 21 19:39:19 Argon5 ywc-watchdog[51194]: info: RadioWatchdogWorker[0]
     Nov 21 19:39:19 Argon5 ywc-watchdog[51194]:       Transmit ended. Resetting timer.
