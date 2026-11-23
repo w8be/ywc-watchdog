@@ -4,7 +4,7 @@
 
 - Radio Antennas
 - Radio Mode
-- Radio Power
+- Radio RF Power
 - Radio Status [on,off]
 - Radio SWR
 - Radio Transmit
