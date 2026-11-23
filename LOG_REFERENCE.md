@@ -56,7 +56,7 @@
     Nov 21 10:15:55 127.0.0.1 ywc-watchdog[50059]: info: RadioWatchdogWorker[0]
     ```
 
-5.  ### Read Pwr/Swr/Temp calibration [api endpoint: /cat/status]:
+5.  ### Read Pwr/Swr/Temp calibration [api endpoint: /api/calibration/all]:
     ```yaml
     Nov 21 10:18:56 127.0.0.1 ywc-watchdog[50112]:       [CONFIG] SWR Meter Calibration Values: Raw 0 -> SWR 1, Raw 51 -> SWR 1.5, Raw 77 -> SWR 2, Raw 128 -> SWR 3, Raw 173 -> SWR 5, Raw 242 -> SWR 9.9
     Nov 21 10:18:56 127.0.0.1 ywc-watchdog[50112]: info: RadioWatchdogWorker[0]
@@ -99,7 +99,7 @@
     Nov 21 10:15:56 127.0.0.1 ywc-watchdog[50059]: info: RadioWatchdogWorker[0]
     ```
 
-9.  ### Track transmit mode status [api endpoint: /api/cat/status/Activevfo.mode]
+9.  ### Track transmit mode status [api endpoint: /api/cat/status]
     ```yaml
     Nov 21 19:25:39 127.0.0.1 ywc-watchdog[51051]:       [CONFIG] Radio Power Status: On
     Nov 21 19:25:53 127.0.0.1 ywc-watchdog[51051]: info: RadioWatchdogWorker[0]
